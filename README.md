@@ -3,7 +3,7 @@
 Module d'entraînement au marquage des points pour la spécialité **Beursault** de la formation des arbitres fédéraux FFTA.
 Page unique, sans dépendance à installer : tout est dans `index.html`.
 
-![Palier 2 du simulateur](docs/capture.png)
+![Palier 2 du simulateur](capture.png)
 
 **Accès en ligne : https://ghibau.github.io/Beursault/**
 
