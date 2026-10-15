@@ -1,5 +1,20 @@
 <!doctype html>
-<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="fr"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Entraînement au marquage des points sur la carte Beursault et la carte du Bouquet, en trois paliers : un impact, cinq archers, contrôle d'une feuille de marque.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:site_name" content="Spécialité Beursault">
+<meta property="og:title" content="Simulateur Beursault">
+<meta property="og:description" content="Entraînement au marquage des points sur la carte Beursault et la carte du Bouquet, en trois paliers.">
+<meta property="og:url" content="https://ghibau.github.io/Beursault/">
+<meta property="og:image" content="https://ghibau.github.io/Beursault/docs/apercu.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Page d'accueil du simulateur Beursault, avec les trois paliers">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://ghibau.github.io/Beursault/docs/apercu.png">
 <meta name="claude:viewport-fit-sides" content="cover">
 <title>Simulateur Beursault</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -133,6 +148,71 @@ table.sheet{width:100%;min-width:480px;border-collapse:collapse;table-layout:fix
 .sheet td.miss{color:var(--bad);text-decoration:line-through;opacity:.85}
 .sheet td.tot{background:var(--bg);color:var(--muted)}
 .sheet tfoot td{font-weight:600;text-align:left;padding-left:10px;background:var(--bg)}
+.lbl{font-family:var(--font-mono);font-weight:500;text-anchor:middle;fill:var(--cardink);stroke:var(--paper);stroke-width:3;paint-order:stroke}
+.lbl.cur{fill:var(--hl)}
+.annnote{font-weight:600}
+.who{margin:10px 0 0;font-size:14px;display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center}
+.who b{font-family:var(--font-head);font-size:19px}
+.sw{display:inline-block;width:13px;height:13px;border-radius:50%;border:1.5px solid var(--ink);vertical-align:-2px;margin-right:4px}
+.said{margin:6px 0 0;font-size:15px}
+.said b{font-family:var(--font-head);font-size:22px}
+.exam{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;align-items:center}
+.exam button{font-family:var(--font-head);font-weight:700;font-size:16px;min-width:38px;padding:3px 9px;border-radius:6px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.exam button[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.exam button.mk{border-color:var(--hl)}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.btn.alt{background:var(--surface);color:var(--ink);border:1.5px solid var(--ink)}
+.btn:disabled{opacity:.5;cursor:default}
+.tabs{display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap}
+.tab{font-family:var(--font-head);font-weight:600;font-size:15px;padding:5px 10px;border-radius:6px 6px 0 0;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;display:flex;align-items:center;gap:2px}
+.tab[aria-selected="true"]{background:var(--surface);border-color:var(--ink);border-bottom-color:var(--surface);font-weight:700}
+.tab .sw{width:11px;height:11px;margin-right:1px}
+.tab .sw+.sw{margin-right:5px}
+.pip{display:inline-block;width:8px;height:8px;border-radius:50%;border:1.5px solid var(--line);margin-left:3px}
+.pip.ok{background:var(--ok);border-color:var(--ok)}
+.pip.bad{background:var(--bad);border-color:var(--bad)}
+table.sheet.vert{min-width:0;max-width:440px;margin:0 auto}
+.sheet th.rowh{width:52px}
+.sheet td.mult{background:var(--bg);color:var(--muted);font-size:12px}
+.sheet tfoot td{text-align:center;padding-left:0}
+.sheetsum{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:10px;font-family:var(--font-mono);font-size:13px;color:var(--muted)}
+.sheetsum span{border:1.5px solid var(--line);border-radius:8px;padding:4px 12px;min-width:110px}
+.sheetsum b{color:var(--ink);font-size:16px;margin-left:6px}
+.hit{fill:transparent;cursor:pointer}
+#home{display:none}
+.onhome #home{display:block}
+.onhome .rule,.onhome .stick,.onhome .bot{display:none!important}
+.home h1{margin:2px 0 10px;font-size:34px}
+.home .eyebrow{margin:0;font-family:var(--font-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.home .lead{max-width:70ch;margin:0 0 16px}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:800px){.cards{grid-template-columns:minmax(0,1fr)}}
+.pcard{display:flex;flex-direction:column;gap:8px;align-items:flex-start;text-align:left;font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:10px;padding:14px 16px;cursor:pointer}
+.pcard:hover,.pcard:focus-visible{border-color:var(--ink)}
+.pcard .num{font-family:var(--font-mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.pcard b{font-family:var(--font-head);font-size:22px}
+.pcard .vol{font-weight:600;font-size:14px}
+.pcard .go{margin-top:auto;font-family:var(--font-head);font-weight:600;background:var(--accent);color:var(--accent-ink);padding:6px 14px;border-radius:6px}
+.homebtn{justify-self:start;margin-top:6px;font-family:var(--font-head);font-weight:600;font-size:14px;padding:3px 10px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.homebtn{display:block}
+.simu{font-weight:600;color:var(--ink);margin:0 0 8px}
+table.sheet.dense th,table.sheet.dense td{height:21px;font-size:12.5px}
+.sheet td.wr{font-weight:700;color:var(--ink)}
+.sheet td.rat{text-decoration:line-through;color:#d22;font-weight:700}
+.sheet td.red{color:#d22}
+.sheet th.visa,.sheet td.visa{width:34px;font-size:11px;color:var(--ok)}
+.tap{cursor:pointer}
+.sheet .tap:hover,.sheetsum .tap:hover{background:var(--bg)}
+.flag{outline:2.5px solid var(--hl);outline-offset:-2px;background:var(--bad-bg)}
+.chk-found{outline:2.5px solid var(--ok)!important;background:var(--ok-bg)!important}
+.chk-missed{outline:2.5px solid var(--bad)!important;background:var(--bad-bg)!important}
+.chk-false{outline:2.5px dashed var(--muted)!important}
+.sigs{display:flex;gap:8px;justify-content:center;margin-top:10px;flex-wrap:wrap}
+.sigb{font-family:var(--font-mono);font-size:13px;padding:6px 12px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.sigb.blank{color:var(--muted)}
+ul.chk{margin:8px 0 0;padding-left:0;list-style:none;font-size:14px}
+ul.chk li.f{color:var(--ok)}ul.chk li.m{color:var(--bad)}
+.halo{fill:none;stroke:var(--hl);stroke-width:1.2;stroke-dasharray:3 2}
 .zoom{display:flex;gap:4px}
 .zoom button{font-family:var(--font-head);font-weight:600;font-size:13px;letter-spacing:.02em;text-transform:none;padding:2px 10px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
 .zoom button[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
@@ -144,8 +224,41 @@ table.sheet{width:100%;min-width:480px;border-collapse:collapse;table-layout:fix
 .t-small{font-family:var(--font-body);font-size:15px;text-anchor:middle;dominant-baseline:central;fill:var(--cardink);font-weight:500;stroke:var(--paper);stroke-width:3;paint-order:stroke}
 .gold{stroke:#d9b400;fill:none}
 footer{font-size:12px;color:var(--muted);max-width:90ch}
+/* mobile : bandeau du haut replié, carte + loupe côte à côte et fixées en haut pendant qu'on défile */
+@media (min-width:701px){ .more summary{display:none} }
+.more summary{cursor:pointer;font-family:var(--font-head);font-weight:600;font-size:15px}
+@media (max-width:700px){
+  body{padding-block:8px 16px}
+  .wrap{gap:8px}
+  .panel{padding:10px 12px}
+  .rule{gap:4px}
+  .rule .ttl p{display:none}
+  .rule h1{font-size:20px}
+  .seg{margin-top:6px;gap:5px}
+  .seg button{font-size:13px;padding:4px 10px}
+  .more{margin-top:2px}
+  .more ul{margin-top:8px;font-size:13px}
+  .stick{position:sticky;top:0;z-index:5;padding:8px}
+  .mid{display:grid;grid-template-columns:minmax(0,.72fr) minmax(0,1.28fr);gap:8px;align-items:start}
+  .mid figure:first-child figcaption{display:none}
+  #capName,#capSize,#lpSize{display:none}
+  .mid figcaption{margin-bottom:4px;justify-content:flex-end}
+  .zoom button{font-size:12px;padding:1px 9px}
+  .frame{height:auto;width:100%}
+  .legend{display:none}
+  .q{font-size:19px}
+  .vals{gap:6px}
+  .vals button{font-size:26px;padding:8px 0 6px}
+  .btn{font-size:16px;padding:8px 14px}
+  .tab{font-size:13px;padding:4px 8px}
+  .sheet th,.sheet td{height:26px}
+  .sheetsum span{min-width:0;padding:3px 9px}
+  footer{font-size:11px}
+}
+
 </style>
-</head><body>
+</head>
+<body>
 
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
@@ -197,19 +310,35 @@ footer{font-size:12px;color:var(--muted);max-width:90ch}
 </svg>
 
 <div class="wrap">
+  <section class="panel home" id="home" aria-label="Accueil">
+    <p class="eyebrow">Spécialité arbitre</p>
+    <h1>Simulateur Beursault</h1>
+    <p class="lead">Entraînez-vous au marquage des points sur la carte Beursault de championnat et sur la carte du Bouquet, en trois paliers de difficulté croissante. Vous pouvez changer de carte et de palier à tout moment.</p>
+    <div class="cards">
+      <button type="button" class="pcard" data-go="1"><span class="num">Palier 1</span><b>Un impact, un score</b><span>Une flèche est plantée dans la carte : quelle valeur faut-il annoncer ? Le cordon joue contre l'archer, sauf pour le noir.</span><span class="vol">Simulation de 10 flèches à marquer sur 40</span><span class="go">Commencer</span></button>
+      <button type="button" class="pcard" data-go="2"><span class="num">Palier 2</span><b>Cinq archers</b><span>Le marqueur traite toujours les archers dans le même ordre. Vérifiez qu'il prend la bonne flèche, reconnaissable à ses plumes et à son encoche, et qu'il lui attribue la bonne valeur.</span><span class="vol">Simulation de 5 volées de 5 archers, soit 5 flèches par archer sur 40</span><span class="go">Commencer</span></button>
+      <button type="button" class="pcard" data-go="3"><span class="num">Palier 3</span><b>Contrôle d'une feuille</b><span>Une feuille de marque de 40 flèches est déjà remplie : repérez les lignes mal inscrites, les ratures sans visa, les colonnes, les totaux d'honneurs, de chapelets et de points, les signatures.</span><span class="vol">Une partie complète, 40 flèches</span><span class="go">Commencer</span></button>
+    </div>
+  </section>
   <section class="panel rule" aria-label="À retenir">
     <div class="ttl">
-      <p>Spécialité arbitre · Palier 1</p>
+      <p>Spécialité arbitre</p>
       <h1>Simulateur Beursault</h1>
-      <div class="seg" role="group" aria-label="Carte à marquer">
+      <button type="button" class="homebtn" id="homeBtn">← Accueil</button>
+      <div class="seg" id="discSeg" role="group" aria-label="Carte à marquer">
         <button type="button" data-d="beursault" aria-pressed="true">Carte Beursault</button>
         <button type="button" data-d="bouquet" aria-pressed="false">Carte du Bouquet</button>
       </div>
+      <div class="seg" id="modeSeg" role="group" aria-label="Palier">
+        <button type="button" data-m="1" aria-pressed="true">Palier 1 · une flèche</button>
+        <button type="button" data-m="2" aria-pressed="false">Palier 2 · cinq archers</button>
+        <button type="button" data-m="3" aria-pressed="false">Palier 3 · contrôle d'une feuille</button>
+      </div>
     </div>
-    <ul id="ruleList"></ul>
+    <details class="more" id="more"><summary>À retenir (règles de marquage)</summary><ul id="ruleList"></ul></details>
   </section>
 
-  <section class="panel" aria-label="Carte et loupe">
+  <section class="panel stick" id="stickPanel" aria-label="Carte et loupe">
     <div class="mid">
       <figure>
         <figcaption><span id="capName">Carte de championnat</span><span id="capSize">50 × 70 cm</span></figcaption>
@@ -236,7 +365,14 @@ footer{font-size:12px;color:var(--muted);max-width:90ch}
   <section class="panel bot" aria-label="Décision et feuille de marque">
     <div>
       <div id="quiz">
-        <div class="q-top"><h2 class="q">Quelle valeur annoncer ?</h2><span class="n" id="qN"></span></div>
+        <div class="q-top"><h2 class="q" id="qTitle">Quelle valeur annoncer ?</h2><span class="n" id="qN"></span></div>
+        <div id="p2" hidden>
+          <p class="who" id="who"></p>
+          <p class="said" id="said"></p>
+          <div class="exam" id="exam" role="group" aria-label="Examiner une flèche"><button type="button" id="otherBtn">Examiner une autre flèche</button><button type="button" id="backPick" hidden>Revenir à celle du marqueur</button></div>
+          <div class="acts" id="acts"><button type="button" class="btn" id="validate"></button><button type="button" class="btn alt" id="takeThis" hidden></button></div>
+          <p class="hint" id="valsHint">Ou corrigez la valeur à inscrire sur la feuille de cet archer :</p>
+        </div>
         <div class="vals" id="vals" role="group" aria-label="Valeur de la flèche">
           <button type="button" data-v="0">0<small>pt</small></button>
           <button type="button" data-v="1">1<small>pt</small></button>
@@ -244,13 +380,20 @@ footer{font-size:12px;color:var(--muted);max-width:90ch}
           <button type="button" data-v="3">3<small>pts</small></button>
           <button type="button" data-v="4">4<small>pts</small></button>
         </div>
-        <p class="hint">Les touches 0 à 4 du clavier fonctionnent aussi.</p>
+        <p class="hint" id="hint"></p>
       </div>
       <div id="end" hidden>
         <h2 class="q">Série terminée</h2>
         <p class="end-score" id="endScore"></p>
-        <p class="hint">Cliquez sur un numéro de flèche dans la feuille pour la revoir à la loupe.</p>
+        <p class="hint" id="endDetail" hidden></p>
+        <p class="hint" id="endHint"></p>
         <button type="button" class="btn" id="again" style="margin-top:12px">Nouvelle série</button>
+      </div>
+      <div id="p3box" hidden>
+        <div class="q-top"><h2 class="q">Cette feuille est-elle correcte ?</h2><span class="n">40 flèches</span></div>
+        <p class="said">Feuille remplie à contrôler, comme dans le référentiel : une partie complète de 40 flèches. Repérez les erreurs, puis touchez l'élément concerné : le numéro de la ligne si une flèche est mal inscrite (valeur absente, rature sans visa), la case Honneurs ou Points d'une colonne, un total, une signature. Validez ensuite ; s'il n'y a rien à signaler, validez directement.</p>
+        <p class="hint" id="flagCount"></p>
+        <div class="acts"><button type="button" class="btn" id="check3">Valider mon contrôle</button><button type="button" class="btn" id="again3" hidden>Nouvelle feuille</button></div>
       </div>
       <div class="feedback" id="feedback" aria-live="polite"></div>
     </div>
@@ -260,11 +403,15 @@ footer{font-size:12px;color:var(--muted);max-width:90ch}
         <h2 class="q">Feuille de marque</h2>
         <span class="score" id="score"></span>
       </div>
+      <p class="hint simu" id="simu"></p>
+      <div class="tabs" id="tabs" role="tablist" aria-label="Feuille de marque de chaque archer" hidden></div>
       <div class="scroll"><table class="sheet" id="sheet" aria-label="Feuille de marque de la série"></table></div>
+      <div class="sheetsum"><span id="sHon">Honneurs <b id="hon"></b></span><span id="chapW"><span id="sChap" style="border:0;padding:0;min-width:0">Chapelets <b id="chap"></b></span></span><span id="sPts">Points <b id="pts"></b></span></div>
+      <div class="sigs" id="sigs" hidden></div>
     </div>
   </section>
 
-  <footer>Prototype de travail, palier 1 : valeur et honneur d'une flèche sur la carte Beursault de championnat et sur la carte du Bouquet (règlement FFTA). Les impacts sont tirés au hasard, avec au moins 0,8 mm d'écart avec chaque limite pour qu'aucune décision ne soit ambiguë à l'écran.</footer>
+  <footer>Prototype de travail : palier 1 (valeur d'une flèche), palier 2 (cinq archers : flèche et valeur retenues par le marqueur) et palier 3 (contrôle d'une feuille remplie), sur la carte Beursault de championnat et sur la carte du Bouquet (règlement FFTA). Les impacts sont tirés au hasard, avec au moins 0,8 mm d'écart avec chaque limite pour qu'aucune décision ne soit ambiguë à l'écran.</footer>
 </div>
 
 <script>
@@ -431,24 +578,71 @@ function sample(D){
   return Object.assign({d,x,y},D.classify(d));
 }
 function series(D,n=10){
+  const maxSame=Math.ceil(D.maxSame*n/10),minTouch=Math.ceil(4*n/10);
   let a=[];
   for(let t=0;t<500;t++){
     a=[];
     while(a.length<n){const s=sample(D); if(s)a.push(s);}
     const cnt=new Array(D.max+1).fill(0); a.forEach(s=>cnt[s.v]++);
     const touch=a.filter(s=>D.touch.test(s.key)).length;
-    if(cnt.every(c=>c>0) && Math.max(...cnt)<=D.maxSame && touch>=4) return a;
+    if(cnt.every(c=>c>0) && Math.max(...cnt)<=maxSame && touch>=minTouch) return a;
+  }
+  return a;
+}
+
+/* ---------- palier 2 : cinq archers, un marqueur ---------- */
+const ARCH=[
+  {plume:'#d62828',enc:'#ffffff',pl:'rouges',un:'blanche'},
+  {plume:'#2e9e44',enc:'#f2d100',pl:'vertes',un:'jaune'},
+  {plume:'#1f5fd1',enc:'#f28c1c',pl:'bleues',un:'orange'},
+  {plume:'#1a1a1a',enc:'#f06fa8',pl:'noires',un:'rose'},
+  {plume:'#7b3fb5',enc:'#ffffff',pl:'violettes',un:'blanche'}
+];
+const FAV={beursault:{petit:3,z2c:2,grand:1,'noir-touch':3},bouquet:{marmot:2,dore:1,'noir-touch':2}};
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[a[i],a[j]]=[a[j],a[i]];}return a;}
+/* annonce erronée réaliste : le marqueur favorise la zone supérieure quand la flèche touche un cordon */
+function wrongValue(D,s){
+  const fav=FAV[D.id][s.key];
+  if(fav!==undefined&&fav!==s.v&&Math.random()<0.7) return fav;
+  const c=[s.v-1,s.v+1].filter(x=>x>=0&&x<=D.max);
+  return c[(Math.random()*c.length)|0];
+}
+const ROUNDS=5;
+function spacedRounds(a){
+  for(let h=0;h<a.length;h+=5) for(let i=h;i<h+5;i++) for(let j=i+1;j<h+5;j++){
+    if(Math.hypot(a[i].x-a[j].x,a[i].y-a[j].y)<13) return false;
+  }
+  return true;
+}
+/* 5 flèches par archer (ROUNDS x 5) ; la flèche i d'une ronde est celle de l'archer i%5.
+   s.take = flèche réellement prise par le marqueur, s.ann = valeur annoncée, s.err = null | 'value' | 'arrow' */
+function seriesP2(D){
+  const N=ROUNDS*5;
+  let a=[];
+  for(let t=0;t<3000;t++){
+    a=series(D,N);
+    if(!spacedRounds(a)) continue;
+    a.forEach((s,i)=>{s.round=Math.floor(i/5);s.arch=i%5;s.rot=Math.random()*Math.PI*2;s.take=s;s.ann=s.v;s.err=null;});
+    const nErr=5+((Math.random()*6)|0);
+    const idx=shuffle(a.map((s,i)=>i)).slice(0,nErr);
+    let nv=0,na=0;
+    idx.forEach(i=>{
+      const s=a[i],base=s.round*5;
+      const cand=[0,1,2,3,4].map(k=>a[base+k]).filter(o=>o!==s&&o.v!==s.v);
+      if(cand.length&&Math.random()<0.5){const o=cand[(Math.random()*cand.length)|0];s.take=o;s.ann=o.v;s.err='arrow';na++;}
+      else{s.ann=wrongValue(D,s);s.err='value';nv++;}
+    });
+    if(nv>=2&&na>=2) return a;
   }
   return a;
 }
 // </logic>
 
-
 const $=id=>document.getElementById(id);
 const NS='http://www.w3.org/2000/svg';
 function el(tag,attrs){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e;}
 function mk(tag,text,cls){const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(cls)e.className=cls;return e;}
-const S={ser:[],i:0,ans:[],done:false,over:false};
+const S={ser:[],i:0,ans:[],res:[],done:false,over:false,mode:1,tab:0,insp:null,shown:null};
 let D=DISCS.beursault;
 
 /* étoile à 8 branches du marmot : base à 10 mm du centre, pointe à 25 mm */
@@ -468,72 +662,162 @@ function applyZoom(){
   document.querySelectorAll('.zoom button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.z===zoom)));
   $('lpSize').textContent='Loupe · fenêtre de '+(2*ZOOM[zoom])+' mm';
 }
-function showArrow(s,highlight){
-  const v=ZOOM[zoom];
-  S.shown={s,highlight};
-  $('loupe').setAttribute('viewBox',(s.x-v)+' '+(s.y-v)+' '+(2*v)+' '+(2*v));
-  const lp=$('lpMark'); lp.replaceChildren();
-  if(highlight){
-    const b=nearestBand(D,s.d);
-    if(b.a>0) lp.appendChild(el('circle',{cx:0,cy:0,r:b.a,class:'hl'}));
-    lp.appendChild(el('circle',{cx:0,cy:0,r:b.b,class:'hl'}));
-  }
-  lp.appendChild(el('circle',{cx:s.x,cy:s.y,r:RA,class:'shaft'}));
-  lp.appendChild(el('circle',{cx:s.x,cy:s.y,r:.5,class:'dot'}));
+const revealed=()=>S.done||S.over;
+const okAt=i=>S.mode===2?(S.res[i]&&S.res[i].ok):(S.ans[i]===S.ser[i].v);
+const pts=n=>n+(n>1?' points':' point');
+const colTxt=a=>'deux plumes '+ARCH[a].pl+', une plume '+ARCH[a].un;
+
+function scaleBar(lp,s,v){
   const x0=s.x-v+1.5,y0=s.y+v-5.5;
   lp.appendChild(el('rect',{x:x0-.8,y:y0-1,width:14,height:5.2,class:'scale-bg'}));
   lp.appendChild(el('line',{x1:x0,y1:y0+1,x2:x0+10,y2:y0+1,stroke:'var(--cardink)','stroke-width':.5}));
   lp.appendChild(el('line',{x1:x0,y1:y0,x2:x0,y2:y0+2,stroke:'var(--cardink)','stroke-width':.5}));
   lp.appendChild(el('line',{x1:x0+10,y1:y0,x2:x0+10,y2:y0+2,stroke:'var(--cardink)','stroke-width':.5}));
   const t=el('text',{x:x0,y:y0+4,class:'scale-t'}); t.textContent='10 mm'; lp.appendChild(t);
+}
+function bandCircles(lp,s){
+  const b=nearestBand(D,s.d);
+  if(b.a>0) lp.appendChild(el('circle',{cx:0,cy:0,r:b.a,class:'hl'}));
+  lp.appendChild(el('circle',{cx:0,cy:0,r:b.b,class:'hl'}));
+}
+
+/* ---- palier 1 : une flèche ---- */
+function showArrow(s,highlight){
+  const v=ZOOM[zoom];
+  S.shown={s,highlight};
+  $('loupe').setAttribute('viewBox',(s.x-v)+' '+(s.y-v)+' '+(2*v)+' '+(2*v));
+  const lp=$('lpMark'); lp.replaceChildren();
+  if(highlight) bandCircles(lp,s);
+  lp.appendChild(el('circle',{cx:s.x,cy:s.y,r:RA,class:'shaft'}));
+  lp.appendChild(el('circle',{cx:s.x,cy:s.y,r:.5,class:'dot'}));
+  scaleBar(lp,s,v);
   const ov=$('ovMark'); ov.replaceChildren();
   ov.appendChild(el('rect',{x:s.x-v,y:s.y-v,width:2*v,height:2*v,class:'ring','stroke-width':3.5*D.k}));
   ov.appendChild(el('circle',{cx:s.x,cy:s.y,r:RA*D.k,class:'shaft'}));
 }
 
-/* feuille de marque */
-function buildSheet(){
-  const t=$('sheet'); t.replaceChildren();
-  const hr=t.createTHead().insertRow();
-  hr.appendChild(mk('th','Flèche','rowh'));
-  S.ser.forEach((s,i)=>{
-    const th=mk('th'); th.id='h'+i;
-    const b=mk('button',String(i+1)); b.type='button'; b.disabled=true;
-    b.setAttribute('aria-label','Revoir la flèche '+(i+1));
-    b.addEventListener('click',()=>review(i));
-    th.appendChild(b); hr.appendChild(th);
-  });
-  hr.appendChild(mk('th','Σ','sig'));
-  const tb=t.createTBody();
-  for(let v=0;v<=D.max;v++){
-    const r=tb.insertRow();
-    r.appendChild(mk('th',v+(v>1?' pts':' pt'),'rowh'));
-    S.ser.forEach((s,i)=>{const td=mk('td'); td.id='c'+i+'_'+v; r.appendChild(td);});
-    const tt=mk('td','','tot'); tt.id='tot'+v; r.appendChild(tt);
+/* ---- palier 2 : cinq archers ---- */
+const roundOf=r=>S.ser.slice(r*5,r*5+5);
+const NR=()=>S.ser.length/5;
+function drawLoupeArrow(g,o){
+  const c=ARCH[o.arch];
+  g.appendChild(el('circle',{cx:o.x,cy:o.y,r:RA,class:'shaft'}));
+  for(let k=0;k<3;k++){
+    const a=o.rot+k*2*Math.PI/3,ca=Math.cos(a),sa=Math.sin(a);
+    const at={x1:o.x+RA*ca,y1:o.y+RA*sa,x2:o.x+(RA+4.5)*ca,y2:o.y+(RA+4.5)*sa,'stroke-linecap':'round'};
+    const col=k===0?c.enc:c.plume;
+    const light=['#ffffff','#f2d100','#f28c1c','#f06fa8'].includes(col);
+    g.appendChild(el('line',Object.assign({stroke:light?'#222':'#fff','stroke-width':2.6,opacity:.9},at)));
+    g.appendChild(el('line',Object.assign({stroke:col,'stroke-width':1.6},at)));
   }
-  const tf=t.createTFoot();
-  const foot=[['Honneurs','hon']];
-  if(D.hasChap) foot.push(['Chapelets','chap']);
-  foot.push(['Points','pts']);
-  foot.forEach(([lab,id])=>{
-    const r=tf.insertRow(); r.appendChild(mk('th',lab,'rowh'));
-    const td=mk('td'); td.colSpan=S.ser.length+1; td.id=id; r.appendChild(td);
+  g.appendChild(el('circle',{cx:o.x,cy:o.y,r:1.6,fill:c.enc,stroke:'#222','stroke-width':.35}));
+}
+function showRound(i,focus,highlight){
+  const v=ZOOM[zoom],k=D.k,grp=roundOf(focus.round),pick=S.ser[i].take;
+  S.shown={i,focus,highlight};
+  $('loupe').setAttribute('viewBox',(focus.x-v)+' '+(focus.y-v)+' '+(2*v)+' '+(2*v));
+  const lp=$('lpMark'); lp.replaceChildren();
+  if(highlight) bandCircles(lp,focus);
+  grp.forEach(o=>{ if(o!==focus && Math.abs(o.x-focus.x)<v+9 && Math.abs(o.y-focus.y)<v+9) drawLoupeArrow(lp,o); });
+  drawLoupeArrow(lp,focus);
+  scaleBar(lp,focus,v);
+  const ov=$('ovMark'); ov.replaceChildren();
+  ov.appendChild(el('rect',{x:focus.x-v,y:focus.y-v,width:2*v,height:2*v,class:'ring','stroke-width':3.5*k}));
+  grp.forEach(o=>{
+    const c=ARCH[o.arch];
+    ov.appendChild(el('circle',{cx:o.x,cy:o.y,r:6.5*k,fill:c.plume,stroke:'#fff','stroke-width':1.4*k}));
+    ov.appendChild(el('circle',{cx:o.x,cy:o.y,r:2.6*k,fill:c.enc,stroke:'#222','stroke-width':.5*k}));
+    if(o===pick) ov.appendChild(el('circle',{cx:o.x,cy:o.y,r:11*k,class:'halo','stroke-width':1.6*k}));
+    if(revealed()){
+      const lb=el('text',{x:o.x,y:o.y-11*k,class:'lbl'+(o===focus?' cur':''),'font-size':22*k});
+      lb.textContent=String(o.arch+1);
+      ov.appendChild(lb);
+    }
+    const hit=el('circle',{cx:o.x,cy:o.y,r:11*k,class:'hit'});
+    hit.addEventListener('click',()=>inspect(o));
+    ov.appendChild(hit);
   });
+}
+function redraw(){
+  if(!S.shown) return;
+  if(S.mode===2) showRound(S.shown.i,S.shown.focus,S.shown.highlight);
+  else showArrow(S.shown.s,S.shown.highlight);
+}
+function inspect(o){
+  if(S.mode!==2||!S.shown) return;
+  S.insp=o;
+  showRound(S.shown.i,o,S.shown.highlight);
+  if(!S.done&&!S.over) updateP2();
+}
+function swatches(a){
+  const f=document.createDocumentFragment();
+  [ARCH[a].plume,ARCH[a].enc].forEach(c=>{const s=mk('i','','sw');s.style.background=c;f.appendChild(s);});
+  return f;
+}
+function updateP2(){
+  const s=S.ser[S.i],pick=s.take;
+  $('validate').textContent='Valider l\'annonce ('+s.ann+(s.ann>1?' pts':' pt')+')';
+  $('backPick').hidden=S.insp===pick;
+  const tt=$('takeThis');
+  tt.hidden=S.insp===pick;
+  tt.textContent='La flèche examinée est celle de l\'archer '+(s.arch+1);
+}
+function nextOther(){
+  const s=S.ser[S.i];
+  const g=roundOf(s.round).slice().sort((a,b)=>a.x-b.x||a.y-b.y);
+  const k=g.indexOf(S.insp);
+  inspect(g[(k+1)%5]);
+}
+
+/* ---- feuille de marque verticale, calquée sur la feuille du référentiel : FL en lignes, colonnes 0 à N ---- */
+function vTable(rows,canReview){
+  const t=$('sheet'); t.replaceChildren(); t.className='sheet vert';
+  const hr=t.createTHead().insertRow();
+  hr.appendChild(mk('th','FL','rowh'));
+  for(let v=0;v<=D.max;v++) hr.appendChild(mk('th',String(v)));
+  const tb=t.createTBody();
+  rows.forEach(r=>{
+    const tr=tb.insertRow();
+    const th=mk('th'); th.id='h'+r.idx;
+    const b=mk('button',r.label); b.type='button'; b.disabled=!canReview;
+    b.setAttribute('aria-label',r.aria);
+    b.addEventListener('click',()=>review(r.idx));
+    th.appendChild(b); tr.appendChild(th);
+    for(let v=0;v<=D.max;v++){const td=mk('td'); td.id='c'+r.cp+'_'+v; tr.appendChild(td);}
+  });
+  const tf=t.createTFoot();
+  const r1=tf.insertRow(); r1.appendChild(mk('th','HON','rowh'));
+  for(let v=0;v<=D.max;v++){const td=mk('td'); td.id='hc'+v; r1.appendChild(td);}
+  const r2=tf.insertRow(); r2.appendChild(mk('th','','rowh'));
+  for(let v=0;v<=D.max;v++) r2.appendChild(mk('td',v?('× '+v):'','mult'));
+  const r3=tf.insertRow(); r3.appendChild(mk('th','Pts','rowh'));
+  for(let v=0;v<=D.max;v++){const td=mk('td'); td.id='pc'+v; r3.appendChild(td);}
+  $('chapW').hidden=!D.hasChap;
+}
+function setCounts(list){
+  const cnt=new Array(D.max+1).fill(0); let hon=0,chap=0,pt=0;
+  list.forEach(s=>{cnt[s.v]++; pt+=s.v; if(s.hon)hon++; if(s.chap)chap++;});
+  const n=list.length;
+  cnt.forEach((c,v)=>{
+    $('hc'+v).textContent=n?c:'';
+    $('pc'+v).textContent=(n&&v)?c*v:'';
+  });
+  $('hon').textContent=n?hon:'';
+  if(D.hasChap) $('chap').textContent=n?chap:'';
+  $('pts').textContent=n?pt:'';
+}
+function buildSheet(){
+  vTable(S.ser.map((s,i)=>({idx:i,cp:i,label:String(i+1),aria:'Revoir la flèche '+(i+1)})),false);
   updateTotals();
 }
 function updateTotals(){
-  const cnt=new Array(D.max+1).fill(0); let hon=0,chap=0,pts=0,n=0,good=0;
-  S.ser.forEach((s,i)=>{
-    if(S.ans[i]===undefined) return;
-    n++; cnt[s.v]++; pts+=s.v; if(s.hon)hon++; if(s.chap)chap++; if(S.ans[i]===s.v)good++;
-  });
-  cnt.forEach((c,v)=>{$('tot'+v).textContent=n?c:'';});
-  $('hon').textContent=n?hon:'';
-  if(D.hasChap) $('chap').textContent=n?chap:'';
-  $('pts').textContent=n?pts:'';
+  const done=S.ser.filter((s,i)=>S.ans[i]!==undefined);
+  setCounts(done);
+  const good=done.filter(s=>S.ans[S.ser.indexOf(s)]===s.v).length,n=done.length;
   const sc=$('score'); sc.replaceChildren();
   if(n){sc.append('Score ',mk('b',good+' / '+n),' · '+S.ser.length+' flèches');}
   else sc.textContent=S.ser.length+' flèches à marquer';
+  $('simu').textContent='Simulation de '+S.ser.length+' flèches à marquer sur 40.';
 }
 function fillSheet(i){
   const s=S.ser[i],a=S.ans[i];
@@ -553,11 +837,51 @@ function markCurrent(){
   });
 }
 
-function explain(s,given,target){
-  target.replaceChildren();
-  const ok=given===s.v;
-  target.className='feedback '+(ok?'fb-ok':'fb-bad');
-  target.appendChild(mk('div',ok?('Correct : '+s.v+(s.v>1?' points':' point')):('Erreur : vous avez répondu '+given+', la valeur exacte est '+s.v),'verdict '+(ok?'ok':'bad')));
+/* ---- feuilles de marque : palier 2 (un onglet par archer) ---- */
+function buildTabs(){
+  const tb=$('tabs'); tb.replaceChildren();
+  for(let k=0;k<5;k++){
+    const b=mk('button','','tab'); b.type='button'; b.id='tab'+k;
+    b.setAttribute('role','tab');
+    b.appendChild(swatches(k));
+    b.appendChild(document.createTextNode('Archer '+(k+1)));
+    b.appendChild(mk('span','','pips'));
+    b.addEventListener('click',()=>{S.tab=k; renderSheet2();});
+    tb.appendChild(b);
+  }
+}
+function renderSheet2(){
+  const k=S.tab;
+  for(let a=0;a<5;a++){
+    const b=$('tab'+a);
+    b.setAttribute('aria-selected',String(a===k));
+    const pp=b.querySelector('.pips'); pp.replaceChildren();
+    for(let r=0;r<NR();r++){
+      const rs=S.res[r*5+a];
+      pp.appendChild(mk('i','','pip'+(rs?(rs.ok?' ok':' bad'):'')));
+    }
+  }
+  vTable(Array.from({length:NR()},(_,r)=>r).map(r=>({idx:r*5+k,cp:r,label:String(r+1),aria:'Revoir la volée '+(r+1)+' de l\'archer '+(k+1)})),S.over);
+  const list=[];
+  for(let r=0;r<NR();r++){
+    const idx=r*5+k,rs=S.res[idx],s=S.ser[idx];
+    const th=$('h'+idx);
+    if(!rs){ if(!S.over&&!S.done&&idx===S.i) th.className='cur'; continue; }
+    th.className=rs.ok?'okc':'badc';
+    list.push(s);
+    const right=$('c'+r+'_'+s.v); right.textContent=s.v; right.className=rs.ok?'ok':'fix';
+    if(!rs.ok&&rs.val!==s.v){const w=$('c'+r+'_'+rs.val); w.textContent=rs.val; w.className='miss';}
+  }
+  setCounts(list);
+  const done=S.res.filter(Boolean).length,good=S.res.filter(r=>r&&r.ok).length;
+  const sc=$('score'); sc.replaceChildren();
+  if(done){sc.append('Score ',mk('b',good+' / '+done),' · '+S.ser.length+' décisions');}
+  else sc.textContent=S.ser.length+' décisions à prendre';
+  $('simu').textContent='Simulation de '+S.ser.length+' flèches à marquer sur 40 : 5 volées de 5 archers, soit 5 flèches par archer.';
+}
+
+/* ---- retours ---- */
+function chipsAndRef(target,s){
   target.appendChild(mk('p',D.why[s.key],'why'));
   target.appendChild(mk('p',s.detail,'meas'));
   const cp=mk('p');
@@ -566,18 +890,65 @@ function explain(s,given,target){
   target.appendChild(cp);
   target.appendChild(mk('p',D.ref[s.key],'ref'));
 }
+function explain(s,given,target){
+  target.replaceChildren();
+  const ok=given===s.v;
+  target.className='feedback '+(ok?'fb-ok':'fb-bad');
+  target.appendChild(mk('div',ok?('Correct : '+pts(s.v)):('Erreur : vous avez répondu '+given+', la valeur exacte est '+s.v),'verdict '+(ok?'ok':'bad')));
+  chipsAndRef(target,s);
+}
+function explain2(i,target){
+  const s=S.ser[i],r=S.res[i],t=s.take;
+  target.replaceChildren();
+  target.className='feedback '+(r.ok?'fb-ok':'fb-bad');
+  target.appendChild(mk('div',r.ok?('Correct : archer '+(s.arch+1)+', '+pts(s.v)):'Erreur sur la feuille de l\'archer '+(s.arch+1),'verdict '+(r.ok?'ok':'bad')));
+  let note;
+  const mine='celle de l\'archer '+(s.arch+1)+' ('+colTxt(s.arch)+')';
+  if(s.err===null){
+    note=r.ok?'Annonce exacte, bien validée.':'L\'annonce était exacte ('+pts(s.v)+', bonne flèche). Vous l\'avez modifiée à tort.';
+  }else if(s.err==='value'){
+    if(r.ok) note='Bien vu : le marqueur annonçait '+s.ann+', la valeur exacte est '+s.v+'.';
+    else if(r.kind==='validate') note='Erreur du marqueur non détectée : il annonçait '+s.ann+', la valeur exacte est '+s.v+'.';
+    else note='Le marqueur annonçait '+s.ann+', la valeur exacte est '+s.v+' (vous avez indiqué '+r.val+').';
+  }else{
+    const who='la flèche prise par le marqueur appartient à l\'archer '+(t.arch+1)+' ('+colTxt(t.arch)+')';
+    if(r.ok) note=(r.kind==='take')?('Bien vu : le marqueur avait pris la flèche de l\'archer '+(t.arch+1)+' ('+colTxt(t.arch)+'). La bonne est '+mine+'.'):('Bonne valeur pour l\'archer '+(s.arch+1)+'. Le marqueur avait pourtant pris la flèche de l\'archer '+(t.arch+1)+' ('+colTxt(t.arch)+') : c\'est cette erreur qu\'il fallait signaler.');
+    else if(r.kind==='validate') note='Erreur du marqueur non détectée : '+who+'. La bonne flèche est '+mine+', '+pts(s.v)+'.';
+    else note='Le marqueur avait pris la mauvaise flèche : '+who+'. La bonne est '+mine+', '+pts(s.v)+'.';
+  }
+  target.appendChild(mk('p',note,'annnote'));
+  chipsAndRef(target,s);
+}
 
+/* ---- déroulement ---- */
 function renderQuestion(){
   const s=S.ser[S.i];
   $('quiz').hidden=false; $('end').hidden=true;
-  $('qN').textContent='Flèche '+(S.i+1)+' sur '+S.ser.length;
   const fb=$('feedback'); fb.replaceChildren(); fb.className='feedback';
   document.querySelectorAll('#vals button').forEach(b=>{b.disabled=false;b.className='';});
-  showArrow(s,false);
-  markCurrent();
+  if(S.mode===2){
+    $('qN').textContent='Archer '+(s.arch+1)+' · volée '+(s.round+1)+' sur '+NR();
+    $('p2').hidden=false;
+    $('validate').disabled=false;
+    const w=$('who'); w.replaceChildren();
+    w.appendChild(mk('b','Feuille de l\'archer '+(s.arch+1)));
+    const sp=mk('span'); sp.appendChild(swatches(s.arch)); sp.append(colTxt(s.arch)); w.appendChild(sp);
+    $('said').innerHTML='Le marqueur prend la flèche entourée en pointillés magenta et annonce <b>'+s.ann+'</b>.';
+    const old=$('nextBtn'); if(old) old.remove();
+    S.insp=s.take; S.tab=s.arch;
+    showRound(S.i,s.take,false);
+    updateP2();
+    renderSheet2();
+  }else{
+    $('qN').textContent='Flèche '+(S.i+1)+' sur '+S.ser.length;
+    $('p2').hidden=true;
+    showArrow(s,false);
+    markCurrent();
+  }
 }
 
 function answer(v){
+  if(S.mode===2) return decide('value',v);
   if(S.done||v>D.max) return;
   const s=S.ser[S.i];
   S.ans[S.i]=v; S.done=true;
@@ -598,7 +969,35 @@ function answer(v){
   next.focus({preventScroll:true});
 }
 
+function decide(kind,v){
+  if(S.done) return;
+  const s=S.ser[S.i],pick=s.take;
+  let arrow,val;
+  if(kind==='validate'){arrow=pick;val=s.ann;}
+  else if(kind==='value'){ if(v>D.max) return; arrow=pick;val=v; }
+  else {arrow=S.insp;val=S.insp.v;}
+  S.res[S.i]={kind,arrow,val,ok:(kind==='value'?val===s.v:(arrow===s&&val===s.v))};
+  S.done=true;
+  $('validate').disabled=true; $('takeThis').hidden=true;
+  document.querySelectorAll('#vals button').forEach(b=>{
+    const bv=+b.dataset.v; b.disabled=true;
+    if(bv===s.v) b.className='right';
+    else if(kind==='value'&&bv===val) b.className='wrong';
+  });
+  $('backPick').hidden=true;
+  explain2(S.i,$('feedback'));
+  const next=mk('button',(S.i===S.ser.length-1)?'Voir le bilan':'Archer suivant','btn');
+  next.type='button'; next.id='nextBtn';
+  next.addEventListener('click',nextArrow);
+  $('acts').appendChild(next);
+  S.insp=s;
+  showRound(S.i,s,true);
+  renderSheet2();
+  next.focus({preventScroll:true});
+}
+
 function nextArrow(){
+  const nb=$('nextBtn'); if(nb&&S.mode===2) nb.remove();
   S.i++; S.done=false;
   if(S.i>=S.ser.length) renderEnd(); else renderQuestion();
 }
@@ -606,14 +1005,34 @@ function nextArrow(){
 function renderEnd(){
   S.over=true;
   $('quiz').hidden=true; $('end').hidden=false;
-  const good=S.ser.filter((s,i)=>S.ans[i]===s.v).length;
-  $('endScore').replaceChildren(good+' ',mk('span','bonnes valeurs sur '+S.ser.length));
+  const good=S.ser.filter((s,i)=>okAt(i)).length;
+  $('endScore').replaceChildren(good+' ',mk('span',(S.mode===2?'bonnes décisions sur ':'bonnes valeurs sur ')+S.ser.length));
+  const det=$('endDetail');
+  if(S.mode===2){
+    const errs=S.ser.filter(s=>s.err), caught=errs.filter((s,)=>S.res[S.ser.indexOf(s)].ok).length;
+    const fa=S.ser.filter((s,i)=>!s.err&&!S.res[i].ok).length;
+    det.textContent='Erreurs du marqueur : '+errs.length+' (dont '+errs.filter(s=>s.err==='arrow').length+' mauvaise(s) flèche(s)), détectées : '+caught+'. Fausses alertes : '+fa+'.';
+    det.hidden=false;
+    $('endHint').textContent='Choisissez un archer, puis un numéro de volée dans sa feuille pour revoir la décision à la loupe.';
+  }else{
+    det.hidden=true;
+    $('endHint').textContent='Cliquez sur un numéro de flèche dans la feuille pour la revoir à la loupe.';
+  }
   const fb=$('feedback'); fb.replaceChildren(); fb.className='feedback';
-  S.ser.forEach((s,i)=>{$('h'+i).querySelector('button').disabled=false;});
-  markCurrent();
+  if(S.mode===2){ renderSheet2(); }
+  else { S.ser.forEach((s,i)=>{$('h'+i).querySelector('button').disabled=false;}); markCurrent(); }
 }
 
 function review(i){
+  if(S.mode===2){
+    const s=S.ser[i];
+    S.tab=s.arch; renderSheet2();
+    $('h'+i).setAttribute('aria-current','true');
+    S.insp=s;
+    showRound(i,s,true);
+    explain2(i,$('feedback'));
+    return;
+  }
   S.ser.forEach((s,k)=>$('h'+k).removeAttribute('aria-current'));
   $('h'+i).setAttribute('aria-current','true');
   showArrow(S.ser[i],true);
@@ -624,40 +1043,285 @@ document.querySelectorAll('.zoom button').forEach(b=>b.addEventListener('click',
   zoom=b.dataset.z;
   try{localStorage.setItem('beursault-zoom',zoom);}catch(e){}
   applyZoom();
-  if(S.shown) showArrow(S.shown.s,S.shown.highlight);
+  redraw();
 }));
 function applyDisc(){
   applyZoom();
-  document.querySelectorAll('.seg button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.d===D.id)));
+  document.querySelectorAll('#discSeg button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.d===D.id)));
   ['overview','loupe'].forEach(id=>$(id).querySelector('use').setAttribute('href','#'+D.card));
   $('overview').setAttribute('viewBox',D.vb.join(' '));
   $('fCard').style.aspectRatio=D.vb[2]+' / '+D.vb[3];
   $('capName').textContent=D.cap; $('capSize').textContent=D.size;
-  $('legend').textContent=D.legend;
   const ul=$('ruleList'); ul.replaceChildren();
-  D.rules.forEach(r=>{const li=document.createElement('li'); li.innerHTML=r; ul.appendChild(li);});
+  let rules=D.rules.slice();
+  if(S.mode===3) rules=sheetRules();
+  if(S.mode===2) rules.push('<b>Votre rôle :</b> le marqueur suit toujours l\'ordre des feuilles (archer 1 à 5). Vérifiez qu\'il prend la flèche aux couleurs de l\'archer, puis qu\'il annonce la bonne valeur.');
+  rules.forEach(r=>{const li=document.createElement('li'); li.innerHTML=r; ul.appendChild(li);});
+  $('legend').textContent=S.mode===2
+    ? 'Sur la carte entière, chaque flèche est représentée par un pictogramme agrandi (deux plumes de la première couleur, une de la seconde). Cliquez sur une flèche pour l\'examiner à la loupe. '+(D.id==='bouquet'?'Le marmot est fixé au centre de la carte.':'')
+    : D.legend;
+  document.querySelectorAll('#modeSeg button').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.m===S.mode)));
+  $('qTitle').textContent=S.mode===2?'Le marqueur a-t-il bien noté ?':'Quelle valeur annoncer ?';
+  $('hint').textContent=S.mode===2?'Touches : V pour valider, 0 à '+D.max+' pour corriger la valeur.':'Les touches 0 à '+D.max+' du clavier fonctionnent aussi.';
   document.querySelectorAll('#vals button').forEach(b=>{b.hidden=+b.dataset.v>D.max;});
   $('vals').style.setProperty('--nv',D.max+1);
+  $('tabs').hidden=S.mode!==2;
+  $('stickPanel').hidden=S.mode===3;
+  $('p3box').hidden=S.mode!==3;
+  $('sigs').hidden=S.mode!==3;
+  $('simu').hidden=S.mode===3;
+  if(S.mode===3){$('quiz').hidden=true;$('end').hidden=true;}
+  $('sheet').classList.toggle('dense',S.mode===3);
+}
+function sheetRules(){
+  const vis=D.id==='bouquet'?'le responsable':'l\'arbitre';
+  const r=[
+    'Une ligne = une flèche : une seule valeur par ligne, ni ligne vide ni double inscription.',
+    'Sous chaque colonne, la ligne <b>Honneurs</b> donne le nombre de flèches de la colonne, et la ligne <b>Points</b> ce nombre multiplié par la valeur de la colonne.',
+    'Le total des <b>honneurs</b> additionne les colonnes de 1 point et plus'+(D.hasChap?' ; les <b>chapelets</b> sont les flèches de 2 et 3 points':'')+' ; les <b>points</b> additionnent la ligne Points.'+'',
+    'La feuille est signée par l\'archer et par le marqueur ; toute rature, faite au crayon rouge pour corriger une valeur, doit être contresignée par '+vis+'.'
+  ];
+  return r;
 }
 
 function start(){
   applyDisc();
-  S.ser=series(D); S.i=0; S.ans=[]; S.done=false; S.over=false;
-  buildSheet();
+  if(S.mode===3){ $('tabs').hidden=true; start3(); return; }
+  ['sHon','sChap','sPts'].forEach(id=>{const e=$(id);e.classList.remove('tap','flag','chk-found','chk-missed','chk-false');e.onclick=null;e.onkeydown=null;e.removeAttribute('tabindex');e.removeAttribute('role');});
+  S.i=0; S.ans=[]; S.res=[]; S.done=false; S.over=false; S.shown=null; S.insp=null; S.tab=0;
+  if(S.mode===2){ S.ser=seriesP2(D); buildTabs(); }
+  else { S.ser=series(D); buildSheet(); }
   renderQuestion();
 }
 
+/* ---- palier 3 : contrôle d'une feuille de marque déjà remplie (40 flèches, comme dans le référentiel) ---- */
+const N3=40;
+function gen3(D){
+  const W=D.max===4?[22,26,22,16,14]:[30,36,24,10];
+  const tot=W.reduce((a,b)=>a+b,0);
+  const pickV=()=>{let r=Math.random()*tot;for(let v=0;v<W.length;v++){r-=W[v];if(r<0)return v;}return 0;};
+  const rows=[];
+  for(let i=0;i<N3;i++) rows.push({v:pickV(),mark:null,old:null,visa:null});
+  const idx=shuffle(rows.map((r,i)=>i));
+  // 1 ou 2 ratures régulières (visées), valeur barrée différente de la valeur finale
+  const nRat=1+((Math.random()*2)|0);
+  const ratIdx=idx.splice(0,nRat);
+  ratIdx.forEach(i=>{const r=rows[i];r.old=(r.v+1+((Math.random()*D.max)|0))%(D.max+1);r.visa=true;});
+  const errs=[];
+  const nErr=[0,1,1,2,2,3][(Math.random()*6)|0];
+  const kinds=shuffle(['empty','visa','colHon','colPts','totHon',D.hasChap?'totChap':'totPts','totPts','sigA','sigM']).filter((k,j,a)=>a.indexOf(k)===j);
+  const chosen=kinds.slice(0,nErr);
+  rows.forEach(r=>{r.mark=r.v;});
+  const allCols=['Thon','Tchap','Tpts'];
+  for(let v=0;v<=D.max;v++){allCols.push('h'+v,'p'+v);}
+  chosen.forEach(k=>{
+    if(k==='empty'){const i=idx.shift();rows[i].mark=null;errs.push({k,t:'r'+i,i,neutral:allCols});}
+    else if(k==='visa'){
+      let i=idx.shift();const r=rows[i];
+      r.old=(r.v+1+((Math.random()*D.max)|0))%(D.max+1);r.visa=false;errs.push({k,t:'r'+i,i});
+    }
+  });
+  // valeurs exactes, d'après ce qui est écrit sur la feuille
+  const cnt=new Array(D.max+1).fill(0);
+  rows.forEach(r=>{if(r.mark!==null)cnt[r.mark]++;});
+  const tr={H:0,C:0,P:0};
+  for(let v=1;v<=D.max;v++){tr.H+=cnt[v]; if(v>=2&&D.hasChap)tr.C+=cnt[v]; tr.P+=cnt[v]*v;}
+  // valeurs affichées : d'abord celles de la feuille correcte, puis les fautes du marqueur
+  const hon=cnt.slice(), pts=cnt.map((c,v)=>v?c*v:null);
+  const sig={A:true,M:true};
+  const root={};
+  const d=()=>{const m=1+((Math.random()*2)|0);return Math.random()<.5?-m:m;};
+  chosen.forEach(k=>{
+    if(k==='colHon'){
+      const v=1+((Math.random()*D.max)|0);
+      hon[v]=Math.max(0,cnt[v]+(cnt[v]===0?1:d())); if(hon[v]===cnt[v])hon[v]++;
+      pts[v]=hon[v]*v; root.colHon=v;   // la case Points suit l'effectif inscrit : cohérente mais fausse
+    }
+    if(k==='colPts'){
+      const v=1+((Math.random()*D.max)|0),real=cnt[v]*v;
+      let sh=real+(Math.random()<.5?-1:1)*(Math.random()<.5?1:v);
+      if(sh===real||sh<0)sh=real+v;
+      pts[v]=sh; root.colPts=v;
+    }
+    if(k==='sigA'){sig.A=false;errs.push({k,t:'SA'});}
+    if(k==='sigM'){sig.M=false;errs.push({k,t:'SM'});}
+  });
+  // totaux calculés d'après les cases affichées, puis éventuellement faussés
+  let H=0,C=0,P=0;
+  for(let v=1;v<=D.max;v++){H+=hon[v]; if(v>=2&&D.hasChap)C+=hon[v]; P+=pts[v];}
+  const sums={hon:H,chap:D.hasChap?C:null,pts:P};
+  const bump=x=>Math.max(0,x+(Math.random()<.5?-1:1)*(1+((Math.random()*3)|0)));
+  chosen.forEach(k=>{
+    if(k==='totHon'){sums.hon=bump(H);if(sums.hon===H)sums.hon++;root.totHon=1;}
+    if(k==='totChap'){sums.chap=bump(C);if(sums.chap===C)sums.chap++;root.totChap=1;}
+    if(k==='totPts'){sums.pts=bump(P);if(sums.pts===P)sums.pts++;root.totPts=1;}
+  });
+  // erreurs = tout ce qui diffère de la valeur exacte (une faute en amont fausse aussi les totaux, même cohérents)
+  const casc=(root.colHon||root.colPts)?true:false;
+  for(let v=1;v<=D.max;v++){
+    if(hon[v]!==cnt[v]) errs.push({k:'colHon',t:'h'+v,v,shown:hon[v],real:cnt[v]});
+    if(pts[v]!==cnt[v]*v) errs.push({k:'colPts',t:'p'+v,v,shown:pts[v],real:cnt[v]*v,n:cnt[v],derived:root.colHon===v});
+  }
+  if(sums.hon!==tr.H) errs.push({k:'totHon',t:'Thon',shown:sums.hon,real:tr.H,derived:!root.totHon});
+  if(D.hasChap&&sums.chap!==tr.C) errs.push({k:'totChap',t:'Tchap',shown:sums.chap,real:tr.C,derived:!root.totChap});
+  if(sums.pts!==tr.P) errs.push({k:'totPts',t:'Tpts',shown:sums.pts,real:tr.P,derived:!root.totPts});
+  return {rows,hon,pts,sums,sig,errs};
+}
+function sheet3Build(){
+  const sh=S.sh3,t=$('sheet'); t.replaceChildren(); t.className='sheet vert dense';
+  S.cells={};
+  const tap=(td,key,label)=>{
+    td.classList.add('tap'); td.tabIndex=0; td.setAttribute('role','button'); td.setAttribute('aria-label',label);
+    td.addEventListener('click',()=>toggle3(key));
+    td.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle3(key);}});
+    (S.cells[key]=S.cells[key]||[]).push(td);
+  };
+  const hr=t.createTHead().insertRow();
+  hr.appendChild(mk('th','FL','rowh'));
+  for(let v=0;v<=D.max;v++) hr.appendChild(mk('th',String(v)));
+  hr.appendChild(mk('th','Visa','visa'));
+  const tb=t.createTBody();
+  sh.rows.forEach((r,i)=>{
+    const tr=tb.insertRow();
+    const th=mk('th',String(i+1)); tap(th,'r'+i,'Ligne '+(i+1)); tr.appendChild(th);
+    for(let v=0;v<=D.max;v++){
+      const td=mk('td');
+      if(r.old===v){td.textContent=v;td.className='rat';}
+      else if(r.mark===v){td.textContent=v;td.className=r.old!==null?'wr red':'wr';}
+      tr.appendChild(td);
+    }
+    const vs=mk('td',r.old!==null&&r.visa?'✓':'','visa');
+    tr.appendChild(vs);
+  });
+  const tf=t.createTFoot();
+  const r1=tf.insertRow(); r1.appendChild(mk('th','HON','rowh'));
+  for(let v=0;v<=D.max;v++){const td=mk('td',String(sh.hon[v])); tap(td,'h'+v,'Honneurs, colonne '+v); r1.appendChild(td);}
+  r1.appendChild(mk('td','','visa'));
+  const r2=tf.insertRow(); r2.appendChild(mk('th','','rowh'));
+  for(let v=0;v<=D.max;v++) r2.appendChild(mk('td',v?('× '+v):'','mult'));
+  r2.appendChild(mk('td','','visa'));
+  const r3=tf.insertRow(); r3.appendChild(mk('th','Pts','rowh'));
+  for(let v=0;v<=D.max;v++){const td=mk('td',v?String(sh.pts[v]):''); if(v)tap(td,'p'+v,'Points, colonne '+v); r3.appendChild(td);}
+  r3.appendChild(mk('td','','visa'));
+  $('chapW').hidden=!D.hasChap;
+  $('hon').textContent=sh.sums.hon; $('pts').textContent=sh.sums.pts;
+  if(D.hasChap) $('chap').textContent=sh.sums.chap;
+  [['sHon','Thon'],['sChap','Tchap'],['sPts','Tpts']].forEach(([id,key])=>{
+    const sp=$(id); sp.classList.add('tap'); sp.tabIndex=0; sp.setAttribute('role','button');
+    sp.onclick=()=>toggle3(key);
+    sp.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle3(key);}};
+    (S.cells[key]=S.cells[key]||[]).push(sp);
+  });
+  const sg=$('sigs'); sg.replaceChildren();
+  [['A','Archer'],['M','Marqueur']].forEach(([c,lab])=>{
+    const b=mk('button',lab+' : '+(sh.sig[c]?'signé ✓':'non signé'),'sigb'+(sh.sig[c]?'':' blank')); b.type='button';
+    b.onclick=()=>toggle3('S'+c);
+    (S.cells['S'+c]=S.cells['S'+c]||[]).push(b); sg.appendChild(b);
+  });
+}
+function toggle3(key){
+  if(S.over) return;
+  if(S.flags.has(key)) S.flags.delete(key); else S.flags.add(key);
+  paint3();
+}
+function paint3(){
+  Object.keys(S.cells).forEach(k=>S.cells[k].forEach(c=>c.classList.toggle('flag',S.flags.has(k))));
+  const n=S.flags.size;
+  $('flagCount').textContent=n?(n+(n>1?' éléments signalés.':' élément signalé.')):'Aucun élément signalé pour l\'instant.';
+  $('check3').textContent=n?'Valider mon contrôle':'Valider : la feuille est correcte';
+  const sc=$('score'); sc.replaceChildren();
+  sc.textContent=S.over?'Contrôle terminé':'Contrôle en cours';
+}
+function describe3(e){
+  const D3=D,sfx=e.derived?' (suite d\'une faute plus haut : cohérent avec les cases inscrites, mais faux)':'';
+  switch(e.k){
+    case 'empty': return 'Ligne '+(e.i+1)+' : aucune valeur inscrite pour cette flèche (les totaux sont forcément faux aussi, mais la faute est sur cette ligne).';
+    case 'visa': return 'Ligne '+(e.i+1)+' : une rature n\'est pas contresignée (visa manquant).';
+    case 'colHon': return 'Colonne '+e.v+' : la case Honneurs indique '+e.shown+', mais la colonne contient '+e.real+' marque(s).';
+    case 'colPts': return 'Colonne '+e.v+' : la case Points indique '+e.shown+', or '+e.n+' × '+e.v+' = '+e.real+'.'+sfx;
+    case 'totHon': return 'Honneurs : '+e.shown+' indiqué, la somme de la ligne Honneurs (colonnes 1 à '+D3.max+') donne '+e.real+'.'+sfx;
+    case 'totChap': return 'Chapelets : '+e.shown+' indiqué, les colonnes 2 et 3 donnent '+e.real+'.'+sfx;
+    case 'totPts': return 'Points : '+e.shown+' indiqué, la somme de la ligne Points donne '+e.real+'.'+sfx;
+    case 'sigA': return 'La signature de l\'archer manque.';
+    case 'sigM': return 'La signature du marqueur manque.';
+  }
+}
+function falseLabel3(k){
+  if(k[0]==='r') return 'ligne '+(+k.slice(1)+1);
+  if(k[0]==='h') return 'case Honneurs, colonne '+k.slice(1);
+  if(k[0]==='p') return 'case Points, colonne '+k.slice(1);
+  if(k==='Thon') return 'total des honneurs';
+  if(k==='Tchap') return 'total des chapelets';
+  if(k==='Tpts') return 'total des points';
+  return k==='SA'?'signature de l\'archer':'signature du marqueur';
+}
+function check3(){
+  if(S.over) return;
+  S.over=true;
+  const E=S.sh3.errs, tset=new Set(E.map(e=>e.t));
+  const neutral=new Set(); E.forEach(e=>(e.neutral||[]).forEach(x=>neutral.add(x)));
+  const found=E.filter(e=>S.flags.has(e.t)), missed=E.filter(e=>!S.flags.has(e.t));
+  const fals=[...S.flags].filter(k=>!tset.has(k)&&!neutral.has(k));
+  E.forEach(e=>(S.cells[e.t]||[]).forEach(c=>c.classList.add(S.flags.has(e.t)?'chk-found':'chk-missed')));
+  fals.forEach(k=>(S.cells[k]||[]).forEach(c=>c.classList.add('chk-false')));
+  const fb=$('feedback'); fb.replaceChildren();
+  const perfect=!missed.length&&!fals.length;
+  fb.className='feedback '+(perfect?'fb-ok':'fb-bad');
+  fb.appendChild(mk('div',E.length?(found.length+' erreur'+(found.length>1?'s':'')+' trouvée'+(found.length>1?'s':'')+' sur '+E.length):(fals.length?'Feuille sans erreur : fausse alerte':'Feuille sans erreur'),
+    'verdict '+(perfect?'ok':'bad')));
+  if(!E.length) fb.appendChild(mk('p',fals.length?'Cette feuille était correcte : vous avez signalé à tort '+fals.map(falseLabel3).join(', ')+'.':'Bien vu : toutes les lignes, colonnes, totaux et signatures sont conformes.','annnote'));
+  else{
+    const ul=mk('ul','','chk');
+    E.forEach(e=>{const li=mk('li',(S.flags.has(e.t)?'✓ ':'✗ ')+describe3(e));li.className=S.flags.has(e.t)?'f':'m';ul.appendChild(li);});
+    fb.appendChild(ul);
+    if(fals.length) fb.appendChild(mk('p','Signalé à tort : '+fals.map(falseLabel3).join(', ')+'.','annnote'));
+  }
+  $('check3').hidden=true; $('again3').hidden=false;
+  paint3();
+}
+function start3(){
+  S.sh3=gen3(D); S.flags=new Set(); S.over=false;
+  sheet3Build();
+  $('feedback').replaceChildren(); $('feedback').className='feedback';
+  $('check3').hidden=false; $('again3').hidden=true;
+  paint3();
+}
+
 document.querySelectorAll('#vals button').forEach(b=>b.addEventListener('click',()=>answer(+b.dataset.v)));
-document.querySelectorAll('.seg button').forEach(b=>b.addEventListener('click',()=>{
+document.querySelectorAll('#discSeg button').forEach(b=>b.addEventListener('click',()=>{
   if(DISCS[b.dataset.d]===D) return;
   D=DISCS[b.dataset.d]; start();
 }));
+document.querySelectorAll('#modeSeg button').forEach(b=>b.addEventListener('click',()=>{
+  if(+b.dataset.m===S.mode) return;
+  S.mode=+b.dataset.m; start();
+}));
+$('validate').addEventListener('click',()=>decide('validate'));
+$('takeThis').addEventListener('click',()=>decide('take'));
+$('otherBtn').addEventListener('click',nextOther);
+$('backPick').addEventListener('click',()=>inspect(S.ser[S.i].take));
 $('again').addEventListener('click',start);
 document.addEventListener('keydown',e=>{
   if(e.metaKey||e.ctrlKey||e.altKey) return;
-  if(!$('quiz').hidden && !S.done && /^[0-4]$/.test(e.key)) answer(+e.key);
+  if($('quiz').hidden||S.done) return;
+  if(/^[0-4]$/.test(e.key)) answer(+e.key);
+  else if((e.key==='v'||e.key==='V')&&S.mode===2) decide('validate');
 });
+$('check3').addEventListener('click',check3);
+const showHome=on=>{document.body.classList.toggle('onhome',on);};
+const top0=()=>{try{window.scrollTo(0,0);}catch(e){}};
+$('homeBtn').addEventListener('click',()=>{showHome(true);top0();});
+document.querySelectorAll('.pcard').forEach(b=>b.addEventListener('click',()=>{
+  const m=+b.dataset.go; showHome(false);
+  if(S.mode!==m){S.mode=m; start();}
+  top0();
+}));
+showHome(true);
+$('again3').addEventListener('click',start);
+try{ if(window.matchMedia('(min-width:701px)').matches) $('more').open=true; }catch(e){}
 start();
+
+
 </script>
 
 </body></html>
