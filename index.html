@@ -1079,39 +1079,50 @@ function gen3(D){
       r.old=(r.v+1+((Math.random()*D.max)|0))%(D.max+1);r.visa=false;errs.push({k,t:'r'+i,i});
     }
   });
-  // effectifs affichés = valeurs écrites
+  // valeurs exactes, d'après ce qui est écrit sur la feuille
   const cnt=new Array(D.max+1).fill(0);
   rows.forEach(r=>{if(r.mark!==null)cnt[r.mark]++;});
+  const tr={H:0,C:0,P:0};
+  for(let v=1;v<=D.max;v++){tr.H+=cnt[v]; if(v>=2&&D.hasChap)tr.C+=cnt[v]; tr.P+=cnt[v]*v;}
+  // valeurs affichées : d'abord celles de la feuille correcte, puis les fautes du marqueur
   const hon=cnt.slice(), pts=cnt.map((c,v)=>v?c*v:null);
-  const sums={};
   const sig={A:true,M:true};
+  const root={};
+  const d=()=>{const m=1+((Math.random()*2)|0);return Math.random()<.5?-m:m;};
   chosen.forEach(k=>{
-    const d=()=>{const m=1+((Math.random()*2)|0);return Math.random()<.5?-m:m;};
     if(k==='colHon'){
-      const v=1+((Math.random()*D.max)|0),real=hon[v];hon[v]=Math.max(0,real+(real===0?1:d()));
-      if(hon[v]===real)hon[v]++;
-      errs.push({k,t:'h'+v,v,shown:hon[v],real,neutral:['p'+v]});
+      const v=1+((Math.random()*D.max)|0);
+      hon[v]=Math.max(0,cnt[v]+(cnt[v]===0?1:d())); if(hon[v]===cnt[v])hon[v]++;
+      pts[v]=hon[v]*v; root.colHon=v;   // la case Points suit l'effectif inscrit : cohérente mais fausse
     }
     if(k==='colPts'){
-      const v=1+((Math.random()*D.max)|0),real=hon[v]*v;let sh=real+(Math.random()<.5?-1:1)*(Math.random()<.5?1:v);
+      const v=1+((Math.random()*D.max)|0),real=cnt[v]*v;
+      let sh=real+(Math.random()<.5?-1:1)*(Math.random()<.5?1:v);
       if(sh===real||sh<0)sh=real+v;
-      pts[v]=sh;errs.push({k,t:'p'+v,v,shown:sh,real,n:hon[v]});
+      pts[v]=sh; root.colPts=v;
     }
     if(k==='sigA'){sig.A=false;errs.push({k,t:'SA'});}
     if(k==='sigM'){sig.M=false;errs.push({k,t:'SM'});}
   });
-  // totaux cohérents avec les colonnes affichées, puis éventuellement faussés
+  // totaux calculés d'après les cases affichées, puis éventuellement faussés
   let H=0,C=0,P=0;
   for(let v=1;v<=D.max;v++){H+=hon[v]; if(v>=2&&D.hasChap)C+=hon[v]; P+=pts[v];}
-  // colPts erroné : le total points (affiché) suit les cases affichées
-  sums.hon=H;sums.chap=D.hasChap?C:null;sums.pts=P;
-  const realH=H,realC=C,realP=P;
-  const bump=x=>x+(Math.random()<.5?-1:1)*(1+((Math.random()*3)|0));
+  const sums={hon:H,chap:D.hasChap?C:null,pts:P};
+  const bump=x=>Math.max(0,x+(Math.random()<.5?-1:1)*(1+((Math.random()*3)|0)));
   chosen.forEach(k=>{
-    if(k==='totHon'){sums.hon=Math.max(0,bump(realH));if(sums.hon===realH)sums.hon++;errs.push({k,t:'Thon',shown:sums.hon,real:realH});}
-    if(k==='totChap'){sums.chap=Math.max(0,bump(realC));if(sums.chap===realC)sums.chap++;errs.push({k,t:'Tchap',shown:sums.chap,real:realC});}
-    if(k==='totPts'){sums.pts=Math.max(0,bump(realP));if(sums.pts===realP)sums.pts++;errs.push({k,t:'Tpts',shown:sums.pts,real:realP});}
+    if(k==='totHon'){sums.hon=bump(H);if(sums.hon===H)sums.hon++;root.totHon=1;}
+    if(k==='totChap'){sums.chap=bump(C);if(sums.chap===C)sums.chap++;root.totChap=1;}
+    if(k==='totPts'){sums.pts=bump(P);if(sums.pts===P)sums.pts++;root.totPts=1;}
   });
+  // erreurs = tout ce qui diffère de la valeur exacte (une faute en amont fausse aussi les totaux, même cohérents)
+  const casc=(root.colHon||root.colPts)?true:false;
+  for(let v=1;v<=D.max;v++){
+    if(hon[v]!==cnt[v]) errs.push({k:'colHon',t:'h'+v,v,shown:hon[v],real:cnt[v]});
+    if(pts[v]!==cnt[v]*v) errs.push({k:'colPts',t:'p'+v,v,shown:pts[v],real:cnt[v]*v,n:cnt[v],derived:root.colHon===v});
+  }
+  if(sums.hon!==tr.H) errs.push({k:'totHon',t:'Thon',shown:sums.hon,real:tr.H,derived:!root.totHon});
+  if(D.hasChap&&sums.chap!==tr.C) errs.push({k:'totChap',t:'Tchap',shown:sums.chap,real:tr.C,derived:!root.totChap});
+  if(sums.pts!==tr.P) errs.push({k:'totPts',t:'Tpts',shown:sums.pts,real:tr.P,derived:!root.totPts});
   return {rows,hon,pts,sums,sig,errs};
 }
 function sheet3Build(){
@@ -1180,15 +1191,15 @@ function paint3(){
   sc.textContent=S.over?'Contrôle terminé':'Contrôle en cours';
 }
 function describe3(e){
-  const D3=D;
+  const D3=D,sfx=e.derived?' (suite d\'une faute plus haut : cohérent avec les cases inscrites, mais faux)':'';
   switch(e.k){
     case 'empty': return 'Ligne '+(e.i+1)+' : aucune valeur inscrite pour cette flèche.';
     case 'visa': return 'Ligne '+(e.i+1)+' : une rature n\'est pas contresignée (visa manquant).';
     case 'colHon': return 'Colonne '+e.v+' : la case Honneurs indique '+e.shown+', mais la colonne contient '+e.real+' marque(s).';
-    case 'colPts': return 'Colonne '+e.v+' : la case Points indique '+e.shown+', or '+e.n+' × '+e.v+' = '+e.real+'.';
-    case 'totHon': return 'Honneurs : '+e.shown+' indiqué, la somme de la ligne Honneurs (colonnes 1 à '+D3.max+') donne '+e.real+'.';
-    case 'totChap': return 'Chapelets : '+e.shown+' indiqué, les colonnes 2 et 3 donnent '+e.real+'.';
-    case 'totPts': return 'Points : '+e.shown+' indiqué, la somme de la ligne Points donne '+e.real+'.';
+    case 'colPts': return 'Colonne '+e.v+' : la case Points indique '+e.shown+', or '+e.n+' × '+e.v+' = '+e.real+'.'+sfx;
+    case 'totHon': return 'Honneurs : '+e.shown+' indiqué, la somme de la ligne Honneurs (colonnes 1 à '+D3.max+') donne '+e.real+'.'+sfx;
+    case 'totChap': return 'Chapelets : '+e.shown+' indiqué, les colonnes 2 et 3 donnent '+e.real+'.'+sfx;
+    case 'totPts': return 'Points : '+e.shown+' indiqué, la somme de la ligne Points donne '+e.real+'.'+sfx;
     case 'sigA': return 'La signature de l\'archer manque.';
     case 'sigM': return 'La signature du marqueur manque.';
   }
