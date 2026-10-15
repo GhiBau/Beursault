@@ -193,7 +193,11 @@ table.sheet.vert{min-width:0;max-width:440px;margin:0 auto}
 .pcard b{font-family:var(--font-head);font-size:22px}
 .pcard .vol{font-weight:600;font-size:14px}
 .pcard .go{margin-top:auto;font-family:var(--font-head);font-weight:600;background:var(--accent);color:var(--accent-ink);padding:6px 14px;border-radius:6px}
-.homebtn{justify-self:start;margin-top:6px;font-family:var(--font-head);font-weight:600;font-size:14px;padding:3px 10px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.toprow{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.toprow h1{margin:0}
+.menu summary{cursor:pointer;font-family:var(--font-head);font-weight:600;font-size:15px}
+button,summary{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.homebtn{justify-self:start;margin-top:0;font-family:var(--font-head);font-weight:600;font-size:14px;padding:3px 10px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
 .homebtn{display:block}
 .simu{font-weight:600;color:var(--ink);margin:0 0 8px}
 table.sheet.dense th,table.sheet.dense td{height:21px;font-size:12.5px}
@@ -225,35 +229,68 @@ ul.chk li.f{color:var(--ok)}ul.chk li.m{color:var(--bad)}
 .gold{stroke:#d9b400;fill:none}
 footer{font-size:12px;color:var(--muted);max-width:90ch}
 /* mobile : bandeau du haut replié, carte + loupe côte à côte et fixées en haut pendant qu'on défile */
-@media (min-width:701px){ .more summary{display:none} }
+@media (min-width:701px){ .more summary,.menu summary{display:none} }
 .more summary{cursor:pointer;font-family:var(--font-head);font-weight:600;font-size:15px}
 @media (max-width:700px){
-  body{padding-block:8px 16px}
+  body{padding-block:6px 16px}
   .wrap{gap:8px}
   .panel{padding:10px 12px}
-  .rule{gap:4px}
+  .rule{display:flex;flex-wrap:wrap;align-items:center;column-gap:16px;row-gap:2px;padding:8px 12px}
+  .rule .ttl{display:contents}
+  .toprow{flex:1 0 100%}
+  .menu[open],.more[open]{flex:1 0 100%}
+  #who{flex-wrap:nowrap;gap:4px 10px;margin-top:6px}
+  #who b{font-size:16px}
+  .said{font-size:14px;margin-top:4px}
+  .said b{font-size:19px}
+  #valsHint{margin:6px 0 0;font-size:12px}
+  #p2 .exam{margin-top:6px}
+  #p2 .acts{margin-top:6px}
+  #p2 ~ .vals{margin-top:4px}
+  #p2 ~ .vals button{min-height:46px;padding:6px 0 4px;font-size:24px}
+  #p2 ~ .vals button small{display:none}
   .rule .ttl p{display:none}
-  .rule h1{font-size:20px}
-  .seg{margin-top:6px;gap:5px}
-  .seg button{font-size:13px;padding:4px 10px}
-  .more{margin-top:2px}
+  .rule h1{font-size:19px}
+  .toprow{flex-wrap:nowrap;justify-content:space-between}
+  .homebtn{font-size:13px;padding:5px 12px;white-space:nowrap}
+  .menu{margin-top:2px}
+  .menu .seg{margin-top:8px}
+  .seg{gap:5px}
+  .seg button{font-size:14px;padding:7px 12px}
+  .more{margin-top:4px;padding-top:2px}
   .more ul{margin-top:8px;font-size:13px}
-  .stick{position:sticky;top:0;z-index:5;padding:8px}
-  .mid{display:grid;grid-template-columns:minmax(0,.72fr) minmax(0,1.28fr);gap:8px;align-items:start}
+  .stick{position:sticky;top:0;z-index:5;padding:6px 8px}
+  .mid{display:grid;grid-template-columns:minmax(0,.62fr) minmax(0,1.38fr);gap:8px;align-items:start}
   .mid figure:first-child figcaption{display:none}
   #capName,#capSize,#lpSize{display:none}
   .mid figcaption{margin-bottom:4px;justify-content:flex-end}
-  .zoom button{font-size:12px;padding:1px 9px}
+  .zoom button{font-size:13px;padding:4px 12px}
   .frame{height:auto;width:100%}
   .legend{display:none}
-  .q{font-size:19px}
+  .q{font-size:18px}
+  .bot{gap:14px}
   .vals{gap:6px}
-  .vals button{font-size:26px;padding:8px 0 6px}
-  .btn{font-size:16px;padding:8px 14px}
-  .tab{font-size:13px;padding:4px 8px}
-  .sheet th,.sheet td{height:26px}
+  .vals button{font-size:28px;padding:12px 0 8px;min-height:60px}
+  .btn{font-size:17px;padding:12px 16px;min-height:48px}
+  .acts .btn,#nextBtn{flex:1 1 auto}
+  .exam button{padding:9px 12px;min-height:44px}
+  .tab{font-size:13px;padding:6px 8px}
+  .sheet th,.sheet td{height:28px}
+  table.sheet.dense th,table.sheet.dense td{height:28px}
   .sheetsum span{min-width:0;padding:3px 9px}
+  .sigb{padding:10px 12px}
   footer{font-size:11px}
+  /* après réponse : on libère l'écran pour le retour et le bouton suivant, sans défilement */
+  .feedback{display:flex;flex-direction:column}
+  .feedback .verdict{order:-2}
+  .feedback #nextBtn{order:-1;width:100%}
+  body.ans #vals,body.ans #hint,body.ans #valsHint,body.ans #exam,body.ans #validate,body.ans #takeThis,body.ans #backPick{display:none!important}
+  /* palier 3 : barre de validation toujours accessible sous le pouce */
+  body.m3{padding-bottom:84px}
+  body.m3 #bar3{position:fixed;left:0;right:0;bottom:0;z-index:20;margin:0;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:var(--surface);border-top:1.5px solid var(--line);justify-content:center}
+  body.m3 #bar3 .btn{flex:1 1 auto}
+  body.m3 #flagCount{margin-bottom:0}
+  #quiz{scroll-margin-top:240px}
 }
 
 </style>
@@ -323,8 +360,8 @@ footer{font-size:12px;color:var(--muted);max-width:90ch}
   <section class="panel rule" aria-label="À retenir">
     <div class="ttl">
       <p>Spécialité arbitre</p>
-      <h1>Simulateur Beursault</h1>
-      <button type="button" class="homebtn" id="homeBtn">← Accueil</button>
+      <div class="toprow"><h1>Simulateur Beursault</h1><button type="button" class="homebtn" id="homeBtn">← Accueil</button></div>
+      <details class="menu" id="menu"><summary id="menuSum">Carte et palier</summary>
       <div class="seg" id="discSeg" role="group" aria-label="Carte à marquer">
         <button type="button" data-d="beursault" aria-pressed="true">Carte Beursault</button>
         <button type="button" data-d="bouquet" aria-pressed="false">Carte du Bouquet</button>
@@ -334,8 +371,9 @@ footer{font-size:12px;color:var(--muted);max-width:90ch}
         <button type="button" data-m="2" aria-pressed="false">Palier 2 · cinq archers</button>
         <button type="button" data-m="3" aria-pressed="false">Palier 3 · contrôle d'une feuille</button>
       </div>
+      </details>
     </div>
-    <details class="more" id="more"><summary>À retenir (règles de marquage)</summary><ul id="ruleList"></ul></details>
+    <details class="more" id="more"><summary>Règles</summary><ul id="ruleList"></ul></details>
   </section>
 
   <section class="panel stick" id="stickPanel" aria-label="Carte et loupe">
@@ -393,7 +431,7 @@ footer{font-size:12px;color:var(--muted);max-width:90ch}
         <div class="q-top"><h2 class="q">Cette feuille est-elle correcte ?</h2><span class="n">40 flèches</span></div>
         <p class="said">Feuille remplie à contrôler, comme dans le référentiel : une partie complète de 40 flèches. Repérez les erreurs, puis touchez l'élément concerné : le numéro de la ligne si une flèche est mal inscrite (valeur absente, rature sans visa), la case Honneurs ou Points d'une colonne, un total, une signature. Validez ensuite ; s'il n'y a rien à signaler, validez directement.</p>
         <p class="hint" id="flagCount"></p>
-        <div class="acts"><button type="button" class="btn" id="check3">Valider mon contrôle</button><button type="button" class="btn" id="again3" hidden>Nouvelle feuille</button></div>
+        <div class="acts bar3" id="bar3"><button type="button" class="btn" id="check3">Valider mon contrôle</button><button type="button" class="btn" id="again3" hidden>Nouvelle feuille</button></div>
       </div>
       <div class="feedback" id="feedback" aria-live="polite"></div>
     </div>
@@ -921,7 +959,15 @@ function explain2(i,target){
 }
 
 /* ---- déroulement ---- */
+const setAns=on=>document.body.classList.toggle('ans',!!on);
+const isMobile=()=>{try{return window.matchMedia('(max-width:700px)').matches;}catch(e){return false;}};
+function keepInView(){
+  if(!isMobile()||S.i===0) return;
+  const r=$('quiz').getBoundingClientRect();
+  if(r.top<200||r.top>window.innerHeight*.7){try{$('quiz').scrollIntoView({block:'start'});}catch(e){}}
+}
 function renderQuestion(){
+  setAns(false);
   const s=S.ser[S.i];
   $('quiz').hidden=false; $('end').hidden=true;
   const fb=$('feedback'); fb.replaceChildren(); fb.className='feedback';
@@ -939,11 +985,13 @@ function renderQuestion(){
     showRound(S.i,s.take,false);
     updateP2();
     renderSheet2();
+    keepInView();
   }else{
     $('qN').textContent='Flèche '+(S.i+1)+' sur '+S.ser.length;
     $('p2').hidden=true;
     showArrow(s,false);
     markCurrent();
+    keepInView();
   }
 }
 
@@ -951,7 +999,7 @@ function answer(v){
   if(S.mode===2) return decide('value',v);
   if(S.done||v>D.max) return;
   const s=S.ser[S.i];
-  S.ans[S.i]=v; S.done=true;
+  S.ans[S.i]=v; S.done=true; setAns(true);
   document.querySelectorAll('#vals button').forEach(b=>{
     const bv=+b.dataset.v; b.disabled=true;
     if(bv===s.v) b.className='right';
@@ -977,7 +1025,7 @@ function decide(kind,v){
   else if(kind==='value'){ if(v>D.max) return; arrow=pick;val=v; }
   else {arrow=S.insp;val=S.insp.v;}
   S.res[S.i]={kind,arrow,val,ok:(kind==='value'?val===s.v:(arrow===s&&val===s.v))};
-  S.done=true;
+  S.done=true; setAns(true);
   $('validate').disabled=true; $('takeThis').hidden=true;
   document.querySelectorAll('#vals button').forEach(b=>{
     const bv=+b.dataset.v; b.disabled=true;
@@ -1003,7 +1051,7 @@ function nextArrow(){
 }
 
 function renderEnd(){
-  S.over=true;
+  S.over=true; setAns(false);
   $('quiz').hidden=true; $('end').hidden=false;
   const good=S.ser.filter((s,i)=>okAt(i)).length;
   $('endScore').replaceChildren(good+' ',mk('span',(S.mode===2?'bonnes décisions sur ':'bonnes valeurs sur ')+S.ser.length));
@@ -1066,6 +1114,9 @@ function applyDisc(){
   document.querySelectorAll('#vals button').forEach(b=>{b.hidden=+b.dataset.v>D.max;});
   $('vals').style.setProperty('--nv',D.max+1);
   $('tabs').hidden=S.mode!==2;
+  document.body.classList.toggle('m3',S.mode===3);
+  if(S.mode===3) setAns(false);
+  $('menuSum').textContent=(D.id==='bouquet'?'Bouquet':'Beursault')+' · palier '+S.mode;
   $('stickPanel').hidden=S.mode===3;
   $('p3box').hidden=S.mode!==3;
   $('sigs').hidden=S.mode!==3;
@@ -1228,7 +1279,7 @@ function paint3(){
   Object.keys(S.cells).forEach(k=>S.cells[k].forEach(c=>c.classList.toggle('flag',S.flags.has(k))));
   const n=S.flags.size;
   $('flagCount').textContent=n?(n+(n>1?' éléments signalés.':' élément signalé.')):'Aucun élément signalé pour l\'instant.';
-  $('check3').textContent=n?'Valider mon contrôle':'Valider : la feuille est correcte';
+  $('check3').textContent=n?('Valider mon contrôle ('+n+' signalé'+(n>1?'s':'')+')'):'Valider : la feuille est correcte';
   const sc=$('score'); sc.replaceChildren();
   sc.textContent=S.over?'Contrôle terminé':'Contrôle en cours';
 }
@@ -1278,6 +1329,7 @@ function check3(){
   }
   $('check3').hidden=true; $('again3').hidden=false;
   paint3();
+  if(isMobile()){try{$('feedback').scrollIntoView({behavior:'smooth',block:'start'});}catch(e){}}
 }
 function start3(){
   S.sh3=gen3(D); S.flags=new Set(); S.over=false;
@@ -1318,7 +1370,8 @@ document.querySelectorAll('.pcard').forEach(b=>b.addEventListener('click',()=>{
 }));
 showHome(true);
 $('again3').addEventListener('click',start);
-try{ if(window.matchMedia('(min-width:701px)').matches) $('more').open=true; }catch(e){}
+try{ if(window.matchMedia('(min-width:701px)').matches){ $('more').open=true; $('menu').open=true; } }catch(e){}
+['discSeg','modeSeg'].forEach(id=>$(id).addEventListener('click',e=>{ if(e.target.closest('button')&&isMobile()) $('menu').open=false; }));
 start();
 
 
