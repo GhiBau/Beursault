@@ -1,0 +1,663 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Simulateur Beursault</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Concept : un poste de contrôle en 3 bandeaux. En haut le rappel de règle, au milieu la carte et la loupe côte à côte,
+   en bas la décision à rendre et la feuille de marque qui se remplit.
+   Palette : gris-bleu d'atelier, carton blanc et cordons noirs de la carte, un magenta de repérage pour ce qui est mesuré. */
+:root{
+  --bg:#e9edf1; --surface:#ffffff; --ink:#142029; --muted:#55646f; --line:#cfd8df;
+  --accent:#1c5aa6; --accent-ink:#ffffff;
+  --ok:#16774a; --ok-bg:#e1f3e9; --bad:#b0281f; --bad-bg:#fbe7e5;
+  --paper:#fdfdfb; --cardink:#121212; --arrow:#f0a81e; --hl:#e6007e;
+  --h:clamp(300px,calc(100vh - 500px),540px);
+  --font-head:'Barlow Semi Condensed','Arial Narrow',system-ui,sans-serif;
+  --font-body:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --font-mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f161c; --surface:#18222b; --ink:#e6edf2; --muted:#93a3b0; --line:#2b3947;
+    --accent:#6fa8e8; --accent-ink:#0b1620;
+    --ok:#5fd09a; --ok-bg:#12301f; --bad:#ff8d83; --bad-bg:#3a1714;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f161c; --surface:#18222b; --ink:#e6edf2; --muted:#93a3b0; --line:#2b3947;
+  --accent:#6fa8e8; --accent-ink:#0b1620;
+  --ok:#5fd09a; --ok-bg:#12301f; --bad:#ff8d83; --bad-bg:#3a1714;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font:15px/1.5 var(--font-body);
+  padding-block:14px 24px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+h1,h2{font-family:var(--font-head);margin:0;line-height:1.1;text-wrap:balance}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px 16px;min-width:0}
+
+/* bandeau 1 : rappel */
+.rule{border-left:5px solid var(--hl);display:grid;grid-template-columns:minmax(0,auto) minmax(0,1fr);gap:8px 28px;align-items:center}
+.rule .ttl p{margin:0;font-family:var(--font-mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.rule h1{font-size:26px;font-weight:700}
+.rule ul{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:6px 20px;font-size:14px}
+.rule li{padding-left:12px;position:relative}
+.rule li::before{content:"";position:absolute;left:0;top:.6em;width:5px;height:5px;background:var(--hl);border-radius:50%}
+.rule li b{font-weight:600}
+@media (max-width:860px){.rule{grid-template-columns:minmax(0,1fr)}}
+
+/* bandeau 2 : carte et loupe */
+.mid{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;align-items:flex-start}
+.mid figure{margin:0;min-width:0;max-width:100%}
+.mid figcaption{font-family:var(--font-mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;display:flex;justify-content:space-between;gap:8px}
+.frame{border:1px solid var(--line);border-radius:4px;overflow:hidden;background:var(--paper);line-height:0;height:var(--h)}
+.frame svg{display:block;width:100%;height:100%}
+#fCard{aspect-ratio:5/7}
+#fLoupe{aspect-ratio:1/1;max-width:100%}
+.legend{margin:10px 0 0;font-size:13px;color:var(--muted);text-align:center}
+.legend b{color:var(--ink);font-weight:600}
+.c-paper{fill:var(--paper)}
+.c-ink{fill:var(--cardink)}
+.c-line{stroke:var(--cardink);fill:none}
+.t-num{font-family:var(--font-body);font-size:13px;text-anchor:middle;dominant-baseline:central;fill:var(--cardink);stroke:var(--paper);stroke-width:3.5;paint-order:stroke;font-weight:500}
+.shaft{fill:var(--arrow);fill-opacity:.8;stroke:#3a2a00;stroke-width:.5}
+.dot{fill:#3a2a00}
+.hl{fill:none;stroke:var(--hl);stroke-width:.4;stroke-dasharray:1.1 .7}
+.ring{fill:none;stroke:var(--hl);stroke-width:3.5}
+.scale-bg{fill:var(--paper);fill-opacity:.9}
+.scale-t{font-family:var(--font-mono);font-size:2.5px;fill:var(--cardink)}
+
+/* bandeau 3 : décision et feuille */
+.bot{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:20px;align-items:start}
+@media (max-width:900px){.bot{grid-template-columns:minmax(0,1fr)}}
+.q-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.q{font-family:var(--font-head);font-size:22px;font-weight:600;margin:0}
+.q-top .n{font-family:var(--font-mono);font-size:13px;color:var(--muted)}
+.vals{display:grid;grid-template-columns:repeat(var(--nv,5),minmax(0,1fr));gap:8px;margin-top:10px}
+.vals button{
+  font-family:var(--font-head);font-weight:700;font-size:32px;line-height:1;
+  padding:12px 0 10px;border-radius:6px;border:1.5px solid var(--line);
+  background:var(--surface);color:var(--ink);cursor:pointer;
+}
+.vals button small{display:block;font-family:var(--font-mono);font-weight:500;font-size:10px;letter-spacing:.06em;color:var(--muted);margin-top:3px}
+.vals button:hover:not(:disabled){border-color:var(--accent)}
+.vals button:disabled{cursor:default}
+.vals button.right{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
+.vals button.wrong{background:var(--bad-bg);border-color:var(--bad);color:var(--bad)}
+.vals button.right small,.vals button.wrong small{color:inherit}
+button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.feedback{margin-top:12px;display:grid;gap:6px;font-size:14px}
+.feedback p{margin:0}
+.verdict{font-family:var(--font-head);font-weight:700;font-size:19px;padding:7px 12px;border-radius:5px}
+.verdict.ok{background:var(--ok-bg);color:var(--ok)}
+.verdict.bad{background:var(--bad-bg);color:var(--bad)}
+.fb-bad .why{color:var(--bad);font-weight:500}
+.meas{font-family:var(--font-mono);font-size:12.5px}
+.ref{font-size:12.5px;color:var(--muted)}
+.chip{display:inline-block;font-family:var(--font-mono);font-size:12px;letter-spacing:.04em;text-transform:uppercase;padding:2px 8px;border-radius:3px;border:1px solid var(--line)}
+.chip.hon{border-color:var(--ok);color:var(--ok)}
+.btn{font-family:var(--font-head);font-weight:600;font-size:18px;padding:9px 18px;border-radius:6px;border:0;background:var(--accent);color:var(--accent-ink);cursor:pointer;justify-self:start}
+.end-score{font-family:var(--font-head);font-weight:700;font-size:40px;line-height:1;margin:8px 0}
+.end-score span{font-size:20px;color:var(--muted)}
+.hint{margin:6px 0 0;color:var(--muted);font-size:13px}
+
+.sheet-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:8px}
+.sheet-head .score{font-family:var(--font-mono);font-size:13px;color:var(--muted)}
+.sheet-head .score b{color:var(--ink);font-size:15px}
+.scroll{overflow-x:auto}
+table.sheet{width:100%;min-width:480px;border-collapse:collapse;table-layout:fixed;font-family:var(--font-mono);font-size:14px}
+.sheet th,.sheet td{border:1px solid var(--line);padding:0;height:30px;text-align:center;font-variant-numeric:tabular-nums}
+.sheet th{background:var(--bg);font-weight:500;color:var(--muted);font-size:12px}
+.sheet th.rowh{width:64px;text-align:left;padding-left:8px}
+.sheet th.sig{width:44px}
+.sheet th button{font-family:var(--font-mono);font-size:12px;width:100%;height:100%;border:0;background:transparent;color:inherit;cursor:default;padding:0}
+.sheet th button:enabled{cursor:pointer;color:var(--ink);text-decoration:underline}
+.sheet th.cur{background:var(--accent);color:var(--accent-ink)}
+.sheet th.cur button{color:var(--accent-ink)}
+.sheet th.okc{color:var(--ok)}
+.sheet th.badc{color:var(--bad)}
+.sheet th[aria-current="true"]{background:var(--ink)}
+.sheet th[aria-current="true"] button{color:var(--surface)}
+.sheet td.ok{color:var(--ok);font-weight:700}
+.sheet td.fix{color:var(--bad);background:var(--bad-bg);font-weight:700}
+.sheet td.miss{color:var(--bad);text-decoration:line-through;opacity:.85}
+.sheet td.tot{background:var(--bg);color:var(--muted)}
+.sheet tfoot td{font-weight:600;text-align:left;padding-left:10px;background:var(--bg)}
+.zoom{display:flex;gap:4px}
+.zoom button{font-family:var(--font-head);font-weight:600;font-size:13px;letter-spacing:.02em;text-transform:none;padding:2px 10px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.zoom button[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.seg{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.seg button{font-family:var(--font-head);font-weight:600;font-size:15px;padding:5px 12px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.deco{fill:#1f3b6e}
+.deco-t{font-family:var(--font-head);font-weight:600;fill:#f1e3a6;text-anchor:middle;letter-spacing:.08em}
+.t-small{font-family:var(--font-body);font-size:15px;text-anchor:middle;dominant-baseline:central;fill:var(--cardink);font-weight:500;stroke:var(--paper);stroke-width:3;paint-order:stroke}
+.gold{stroke:#d9b400;fill:none}
+footer{font-size:12px;color:var(--muted);max-width:90ch}
+</style>
+</head><body>
+
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <g id="card">
+      <rect x="-250" y="-350" width="500" height="700" class="c-paper" style="stroke:var(--cardink);stroke-width:1"/>
+      <line x1="0" y1="-262" x2="0" y2="262" class="c-line" stroke-width="1"/>
+      <line x1="-262" y1="0" x2="262" y2="0" class="c-line" stroke-width="1"/>
+      <circle r="232.5" class="c-line" stroke-width="15"/>
+      <circle r="186.5" class="c-line" stroke-width=".8"/>
+      <circle r="146.5" class="c-line" stroke-width="3"/>
+      <circle r="108.75" class="c-line" stroke-width=".8"/>
+      <circle r="67.5" class="c-line" stroke-width="10"/>
+      <circle r="44" class="c-line" stroke-width="3"/>
+      <circle r="28" class="c-line" stroke-width="3"/>
+      <circle r="20" class="c-ink"/>
+      <circle r="5" class="c-paper"/>
+      <g class="t-num">
+        <text x="0" y="-186.5">1</text><text x="0" y="186.5">1</text><text x="-186.5" y="0">1</text><text x="186.5" y="0">1</text>
+        <text x="0" y="-108.75">2</text><text x="0" y="108.75">2</text><text x="-108.75" y="0">2</text><text x="108.75" y="0">2</text>
+        <text x="0" y="-54">3</text><text x="0" y="54">3</text><text x="-54" y="0">3</text><text x="54" y="0">3</text>
+      </g>
+    </g>
+    <g id="cardB">
+      <rect x="-325" y="-500" width="650" height="1000" class="deco"/>
+      <rect x="-305" y="-480" width="610" height="960" fill="none" stroke="#9fb3d8" stroke-width="2"/>
+      <text x="0" y="-380" class="deco-t" font-size="44">BOUQUET PROVINCIAL</text>
+      <text x="0" y="410" class="deco-t" font-size="26">DÉCOR LIBRE DE L'ORGANISATEUR</text>
+      <circle r="242.5" class="c-line" stroke-width="15"/>
+      <circle r="230" class="gold" stroke-width="10"/>
+      <circle r="225" class="c-paper"/>
+      <line x1="0" y1="-225" x2="0" y2="225" class="c-line" stroke-width="1" opacity=".55"/>
+      <line x1="-225" y1="0" x2="225" y2="0" class="c-line" stroke-width="1" opacity=".55"/>
+      <text x="0" y="-205" class="t-small">A</text><text x="0" y="205" class="t-small">B</text>
+      <text x="205" y="0" class="t-small">C</text><text x="-205" y="0" class="t-small">D</text>
+      <g id="marmot">
+        <polygon points="0,-109.6 109.6,0 0,109.6 -109.6,0" class="c-paper" style="stroke:var(--cardink);stroke-width:.8"/>
+        <line x1="0" y1="-109.6" x2="0" y2="109.6" class="c-line" stroke-width=".6"/>
+        <line x1="-109.6" y1="0" x2="109.6" y2="0" class="c-line" stroke-width=".6"/>
+        <circle r="66.5" class="c-line" stroke-width="8"/>
+        <circle r="50.5" class="c-line" stroke-width="1"/>
+        <circle r="40.5" class="c-line" stroke-width="1"/>
+        <circle r="28" class="c-ink"/>
+        <g id="star" fill="var(--paper)"></g>
+        <circle r="5" class="c-paper"/>
+      </g>
+    </g>
+  </defs>
+</svg>
+
+<div class="wrap">
+  <section class="panel rule" aria-label="À retenir">
+    <div class="ttl">
+      <p>Spécialité arbitre · Palier 1</p>
+      <h1>Simulateur Beursault</h1>
+      <div class="seg" role="group" aria-label="Carte à marquer">
+        <button type="button" data-d="beursault" aria-pressed="true">Carte Beursault</button>
+        <button type="button" data-d="bouquet" aria-pressed="false">Carte du Bouquet</button>
+      </div>
+    </div>
+    <ul id="ruleList"></ul>
+  </section>
+
+  <section class="panel" aria-label="Carte et loupe">
+    <div class="mid">
+      <figure>
+        <figcaption><span id="capName">Carte de championnat</span><span id="capSize">50 × 70 cm</span></figcaption>
+        <div class="frame" id="fCard">
+          <svg id="overview" viewBox="-250 -350 500 700" role="img" aria-label="Carte Beursault entière, la zone de la loupe est entourée en magenta">
+            <use href="#card"/>
+            <g id="ovMark"></g>
+          </svg>
+        </div>
+      </figure>
+      <figure>
+        <figcaption><span id="lpSize">Loupe</span><span class="zoom" role="group" aria-label="Niveau de zoom de la loupe"><button type="button" data-z="wide" aria-pressed="true">Large</button><button type="button" data-z="close" aria-pressed="false">Serré</button></span></figcaption>
+        <div class="frame" id="fLoupe">
+          <svg id="loupe" viewBox="-16 -16 32 32" role="img" aria-label="Agrandissement de l'impact de la flèche">
+            <use href="#card"/>
+            <g id="lpMark"></g>
+          </svg>
+        </div>
+      </figure>
+    </div>
+    <p class="legend" id="legend"></p>
+  </section>
+
+  <section class="panel bot" aria-label="Décision et feuille de marque">
+    <div>
+      <div id="quiz">
+        <div class="q-top"><h2 class="q">Quelle valeur annoncer ?</h2><span class="n" id="qN"></span></div>
+        <div class="vals" id="vals" role="group" aria-label="Valeur de la flèche">
+          <button type="button" data-v="0">0<small>pt</small></button>
+          <button type="button" data-v="1">1<small>pt</small></button>
+          <button type="button" data-v="2">2<small>pts</small></button>
+          <button type="button" data-v="3">3<small>pts</small></button>
+          <button type="button" data-v="4">4<small>pts</small></button>
+        </div>
+        <p class="hint">Les touches 0 à 4 du clavier fonctionnent aussi.</p>
+      </div>
+      <div id="end" hidden>
+        <h2 class="q">Série terminée</h2>
+        <p class="end-score" id="endScore"></p>
+        <p class="hint">Cliquez sur un numéro de flèche dans la feuille pour la revoir à la loupe.</p>
+        <button type="button" class="btn" id="again" style="margin-top:12px">Nouvelle série</button>
+      </div>
+      <div class="feedback" id="feedback" aria-live="polite"></div>
+    </div>
+
+    <div>
+      <div class="sheet-head">
+        <h2 class="q">Feuille de marque</h2>
+        <span class="score" id="score"></span>
+      </div>
+      <div class="scroll"><table class="sheet" id="sheet" aria-label="Feuille de marque de la série"></table></div>
+    </div>
+  </section>
+
+  <footer>Prototype de travail, palier 1 : valeur et honneur d'une flèche sur la carte Beursault de championnat et sur la carte du Bouquet (règlement FFTA). Les impacts sont tirés au hasard, avec au moins 0,8 mm d'écart avec chaque limite pour qu'aucune décision ne soit ambiguë à l'écran.</footer>
+</div>
+
+<script>
+// <logic>
+const RA=3.5;
+const fmt=x=>x.toFixed(1).replace('.',',');
+
+/* ---------- Beursault, carte de championnat ---------- */
+const GB={noir:20,z3:62.5,petit:72.5,z2:145,z2o:148,z1:225,grand:240};
+function classifyBeursault(d){
+  const lo=d-RA, hi=d+RA, G=GB;
+  const ov=(a,b)=>Math.min(hi,b)-Math.max(lo,a);
+  if(lo<G.noir){
+    if(hi<=G.noir) return {key:'noir-in',v:4,hon:true,chap:false,detail:'Marge de '+fmt(G.noir-hi)+' mm avant le bord du noir.'};
+    return {key:'noir-touch',v:4,hon:true,chap:false,detail:'Le tube mord sur le noir de '+fmt(G.noir-lo)+' mm.'};
+  }
+  if(hi<=G.z3){
+    const gN=lo-G.noir,gP=G.z3-hi;
+    return {key:'z3',v:3,hon:true,chap:false,detail:'Jeu de '+fmt(Math.min(gN,gP))+' mm avec '+(gN<gP?'le noir.':'le petit cordon.')};
+  }
+  if(lo<G.petit) return {key:'petit',v:2,hon:true,chap:false,detail:'Le tube recouvre le petit cordon sur '+fmt(ov(G.z3,G.petit))+' mm.'};
+  if(hi<=G.z2){
+    const gA=lo-G.petit,gB=G.z2-hi;
+    return {key:'z2',v:2,hon:true,chap:false,detail:'Jeu de '+fmt(Math.min(gA,gB))+' mm avec '+(gA<gB?'le petit cordon.':'le cordon de la zone 2.')};
+  }
+  if(lo<G.z2o) return {key:'z2c',v:1,hon:true,chap:false,detail:'Le tube recouvre le cordon de la zone 2 sur '+fmt(ov(G.z2,G.z2o))+' mm.'};
+  if(hi<=G.z1){
+    const gA=lo-G.z2o,gB=G.z1-hi;
+    return {key:'z1',v:1,hon:true,chap:false,detail:'Jeu de '+fmt(Math.min(gA,gB))+' mm avec '+(gA<gB?'le cordon de la zone 2.':'le grand cordon.')};
+  }
+  if(lo<G.grand) return {key:'grand',v:0,hon:false,chap:false,detail:'Le tube recouvre le grand cordon sur '+fmt(ov(G.z1,G.grand))+' mm.'};
+  return {key:'out',v:0,hon:false,chap:false,detail:'Le tube est à '+fmt(lo-G.grand)+' mm du grand cordon, hors de la zone de points.'};
+}
+
+/* ---------- Bouquet provincial : carte + marmot ---------- */
+const GQ={noir:28,mar:62.5,marO:70.5,z1:225,dore:235};
+function classifyBouquet(d){
+  const lo=d-RA, hi=d+RA, G=GQ;
+  const ov=(a,b)=>Math.min(hi,b)-Math.max(lo,a);
+  if(lo<G.noir){
+    if(hi<=G.noir) return {key:'noir-in',v:3,hon:true,chap:true,detail:'Marge de '+fmt(G.noir-hi)+' mm avant le bord du noir.'};
+    return {key:'noir-touch',v:3,hon:true,chap:true,detail:'Le tube mord sur le noir de '+fmt(G.noir-lo)+' mm.'};
+  }
+  if(hi<=G.mar){
+    const gN=lo-G.noir,gM=G.mar-hi;
+    return {key:'chap',v:2,hon:true,chap:true,detail:'Jeu de '+fmt(Math.min(gN,gM))+' mm avec '+(gN<gM?'le noir.':'le cordon du marmot.')};
+  }
+  if(lo<G.marO) return {key:'marmot',v:1,hon:true,chap:false,detail:'Le tube recouvre le cordon du marmot sur '+fmt(ov(G.mar,G.marO))+' mm.'};
+  if(hi<=G.z1){
+    const gA=lo-G.marO,gB=G.z1-hi;
+    return {key:'z1',v:1,hon:true,chap:false,detail:'Jeu de '+fmt(Math.min(gA,gB))+' mm avec '+(gA<gB?'le cordon du marmot.':'le cordon doré.')};
+  }
+  if(lo<G.dore) return {key:'dore',v:0,hon:false,chap:false,detail:'Le tube recouvre le cordon doré sur '+fmt(ov(G.z1,G.dore))+' mm.'};
+  return {key:'out',v:0,hon:false,chap:false,detail:'Le tube est à '+fmt(lo-G.dore)+' mm au-delà du cordon doré.'};
+}
+
+/* ---------- description des deux disciplines ---------- */
+const DISCS={
+  beursault:{
+    id:'beursault',max:4,hasChap:false,lim:[240,335],
+    classify:classifyBeursault,
+    edges:[GB.noir,GB.z3,GB.petit,GB.z2,GB.z2o,GB.z1,GB.grand],
+    bands:[{a:0,b:20},{a:62.5,b:72.5},{a:145,b:148},{a:225,b:240}],
+    clearMax:GB.z1,outFrom:GB.grand,
+    touch:/^(noir-touch|petit|z2c|grand)$/,maxSame:3,
+    card:'card',vb:[-250,-350,500,700],k:1,
+    cap:'Carte de championnat',size:'50 × 70 cm',
+    legend:'Le disque orangé est le tube de la flèche vu de face (7 mm). Le carré magenta de la carte montre ce que la loupe agrandit.',
+    rules:[
+      '<b>Le cordon joue contre le tireur :</b> une flèche qui le touche compte dans la zone inférieure.',
+      '<b>Exception, le noir :</b> toucher le noir suffit pour marquer 4.',
+      '<b>Grand cordon touché ou hors zone :</b> 0 point, pas d\'honneur.',
+      '<b>Réflexe à désapprendre :</b> sur une cible classique, la ligne profite au tireur.'
+    ],
+    why:{
+      'noir-in':'La flèche est entièrement dans le noir : 4 points.',
+      'noir-touch':'La flèche touche le noir : 4 points. Le noir est la seule zone où toucher la limite profite au tireur.',
+      'z3':'La flèche est dans la zone 3, sans toucher le noir ni le petit cordon : 3 points.',
+      'petit':'La flèche touche le petit cordon, qui ferme la zone 3. Elle compte dans la zone inférieure : 2 points.',
+      'z2':'La flèche est dans la zone 2, sans toucher aucun cordon : 2 points.',
+      'z2c':'La flèche touche le cordon extérieur de la zone 2. Elle compte dans la zone inférieure : 1 point.',
+      'z1':'La flèche est dans la zone 1, sans toucher le cordon de la zone 2 ni le grand cordon : 1 point.',
+      'grand':'La flèche touche le grand cordon : 0 point et pas d\'honneur, car l\'honneur exige de ne pas toucher le grand cordon.',
+      'out':'La flèche est hors de la zone de points : 0 point et pas d\'honneur.'
+    },
+    ref:{
+      'noir-in':'Règle : 4 points dans le noir ou au contact du noir.',
+      'noir-touch':'Règle : 4 points dans le noir ou au contact du noir.',
+      'z3':'Règle : 3 points dans la zone 3 sans toucher le noir ni le cordon extérieur de la zone.',
+      'petit':'Règle : cordon extérieur touché, flèche comptée dans la zone inférieure.',
+      'z2':'Règle : 2 points dans la zone 2 sans toucher son cordon extérieur.',
+      'z2c':'Règle : cordon extérieur touché, flèche comptée dans la zone inférieure.',
+      'z1':'Règle : 1 point dans la zone 1 sans toucher le grand cordon.',
+      'grand':'Règle : l\'honneur est un coup dans la zone de points qui ne touche pas le grand cordon.',
+      'out':'Règle : l\'honneur est un coup dans la zone de points.'
+    }
+  },
+  bouquet:{
+    id:'bouquet',max:3,hasChap:true,lim:[315,490],
+    classify:classifyBouquet,
+    edges:[GQ.noir,GQ.mar,GQ.marO,GQ.z1,GQ.dore],
+    bands:[{a:0,b:28},{a:62.5,b:70.5},{a:225,b:235}],
+    clearMax:GQ.z1,outFrom:GQ.dore,
+    touch:/^(noir-touch|marmot|dore)$/,maxSame:4,
+    card:'cardB',vb:[-325,-500,650,1000],k:1.45,
+    cap:'Carte du Bouquet + marmot',size:'65 × 100 cm',
+    legend:'Le marmot (carré de 155 mm posé sur la pointe) est fixé au centre de la carte. Le disque orangé est le tube de la flèche (7 mm).',
+    rules:[
+      '<b>Au centre, le marmot :</b> noir 3 points, chapelet 2 points, le reste de la carte 1 point.',
+      '<b>Le cordon joue contre le tireur :</b> cordon du marmot touché, la flèche compte 1 point.',
+      '<b>Exception, le noir :</b> toucher le noir suffit pour marquer 3.',
+      '<b>Cordon doré touché ou au-delà :</b> 0 point, pas d\'honneur.'
+    ],
+    why:{
+      'noir-in':'La flèche est entièrement dans le noir du marmot : 3 points.',
+      'noir-touch':'La flèche touche le noir du marmot : 3 points. Le noir est la seule limite qui profite au tireur.',
+      'chap':'La flèche est dans le chapelet, sans toucher le noir ni le cordon du marmot : 2 points.',
+      'marmot':'La flèche touche le cordon du marmot. Elle compte dans la zone inférieure, hors chapelet : 1 point.',
+      'z1':'La flèche est dans la zone 1 de la carte (autour du marmot, coins du marmot compris), sans toucher le cordon doré : 1 point.',
+      'dore':'La flèche touche le cordon doré : 0 point et pas d\'honneur.',
+      'out':'La flèche est au-delà du cordon doré : 0 point et pas d\'honneur.'
+    },
+    ref:{
+      'noir-in':'Règle : 3 points dans le noir ou au contact du noir.',
+      'noir-touch':'Règle : 3 points dans le noir ou au contact du noir.',
+      'chap':'Règle : 2 points dans le chapelet sans toucher le noir ni le cordon du marmot.',
+      'marmot':'Règle : cordon touché, flèche comptée dans la zone inférieure.',
+      'z1':'Règle : 1 point dans la zone inférieure au chapelet sans toucher le cordon doré.',
+      'dore':'Règle : pas d\'honneur si la flèche touche le cordon doré.',
+      'out':'Règle : l\'honneur est un coup dans la zone de points.'
+    }
+  }
+};
+
+function nearestBand(D,d){
+  const lo=d-RA,hi=d+RA;
+  let best=null,bd=1e9;
+  for(const b of D.bands){
+    const dist=Math.max(0,lo-b.b,b.a-hi);
+    if(dist<bd){bd=dist;best=b;}
+  }
+  return best;
+}
+function stable(D,d){
+  const k=D.classify(d).key;
+  return D.classify(d-0.8).key===k && D.classify(d+0.8).key===k;
+}
+function sample(D){
+  const roll=Math.random();
+  let d;
+  if(roll<0.55){
+    const e=D.edges[(Math.random()*D.edges.length)|0];
+    d=e+(Math.random()*2-1)*(RA+3);
+  }else if(roll<0.92){
+    d=8+Math.random()*(D.clearMax-8);
+  }else{
+    d=D.outFrom+3+Math.random()*30;
+  }
+  d=Math.max(d,1);
+  const th=Math.random()*Math.PI*2;
+  const x=d*Math.cos(th),y=d*Math.sin(th);
+  if(Math.abs(x)>D.lim[0]||Math.abs(y)>D.lim[1]) return null;
+  if(!stable(D,d)) return null;
+  return Object.assign({d,x,y},D.classify(d));
+}
+function series(D,n=10){
+  let a=[];
+  for(let t=0;t<500;t++){
+    a=[];
+    while(a.length<n){const s=sample(D); if(s)a.push(s);}
+    const cnt=new Array(D.max+1).fill(0); a.forEach(s=>cnt[s.v]++);
+    const touch=a.filter(s=>D.touch.test(s.key)).length;
+    if(cnt.every(c=>c>0) && Math.max(...cnt)<=D.maxSame && touch>=4) return a;
+  }
+  return a;
+}
+// </logic>
+
+
+const $=id=>document.getElementById(id);
+const NS='http://www.w3.org/2000/svg';
+function el(tag,attrs){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e;}
+function mk(tag,text,cls){const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(cls)e.className=cls;return e;}
+const S={ser:[],i:0,ans:[],done:false,over:false};
+let D=DISCS.beursault;
+
+/* étoile à 8 branches du marmot : base à 10 mm du centre, pointe à 25 mm */
+(function(){
+  const g=$('star');
+  for(let k=0;k<8;k++){
+    const a=k*Math.PI/4,c=Math.cos(a),s=Math.sin(a);
+    const p=(r,w)=>(r*c-w*s).toFixed(2)+','+(r*s+w*c).toFixed(2);
+    g.appendChild(el('polygon',{points:p(10,-3)+' '+p(25,0)+' '+p(10,3)}));
+  }
+})();
+
+const ZOOM={wide:30,close:16};
+let zoom='wide';
+try{const z=localStorage.getItem('beursault-zoom'); if(z&&ZOOM[z]) zoom=z;}catch(e){}
+function applyZoom(){
+  document.querySelectorAll('.zoom button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.z===zoom)));
+  $('lpSize').textContent='Loupe · fenêtre de '+(2*ZOOM[zoom])+' mm';
+}
+function showArrow(s,highlight){
+  const v=ZOOM[zoom];
+  S.shown={s,highlight};
+  $('loupe').setAttribute('viewBox',(s.x-v)+' '+(s.y-v)+' '+(2*v)+' '+(2*v));
+  const lp=$('lpMark'); lp.replaceChildren();
+  if(highlight){
+    const b=nearestBand(D,s.d);
+    if(b.a>0) lp.appendChild(el('circle',{cx:0,cy:0,r:b.a,class:'hl'}));
+    lp.appendChild(el('circle',{cx:0,cy:0,r:b.b,class:'hl'}));
+  }
+  lp.appendChild(el('circle',{cx:s.x,cy:s.y,r:RA,class:'shaft'}));
+  lp.appendChild(el('circle',{cx:s.x,cy:s.y,r:.5,class:'dot'}));
+  const x0=s.x-v+1.5,y0=s.y+v-5.5;
+  lp.appendChild(el('rect',{x:x0-.8,y:y0-1,width:14,height:5.2,class:'scale-bg'}));
+  lp.appendChild(el('line',{x1:x0,y1:y0+1,x2:x0+10,y2:y0+1,stroke:'var(--cardink)','stroke-width':.5}));
+  lp.appendChild(el('line',{x1:x0,y1:y0,x2:x0,y2:y0+2,stroke:'var(--cardink)','stroke-width':.5}));
+  lp.appendChild(el('line',{x1:x0+10,y1:y0,x2:x0+10,y2:y0+2,stroke:'var(--cardink)','stroke-width':.5}));
+  const t=el('text',{x:x0,y:y0+4,class:'scale-t'}); t.textContent='10 mm'; lp.appendChild(t);
+  const ov=$('ovMark'); ov.replaceChildren();
+  ov.appendChild(el('rect',{x:s.x-v,y:s.y-v,width:2*v,height:2*v,class:'ring','stroke-width':3.5*D.k}));
+  ov.appendChild(el('circle',{cx:s.x,cy:s.y,r:RA*D.k,class:'shaft'}));
+}
+
+/* feuille de marque */
+function buildSheet(){
+  const t=$('sheet'); t.replaceChildren();
+  const hr=t.createTHead().insertRow();
+  hr.appendChild(mk('th','Flèche','rowh'));
+  S.ser.forEach((s,i)=>{
+    const th=mk('th'); th.id='h'+i;
+    const b=mk('button',String(i+1)); b.type='button'; b.disabled=true;
+    b.setAttribute('aria-label','Revoir la flèche '+(i+1));
+    b.addEventListener('click',()=>review(i));
+    th.appendChild(b); hr.appendChild(th);
+  });
+  hr.appendChild(mk('th','Σ','sig'));
+  const tb=t.createTBody();
+  for(let v=0;v<=D.max;v++){
+    const r=tb.insertRow();
+    r.appendChild(mk('th',v+(v>1?' pts':' pt'),'rowh'));
+    S.ser.forEach((s,i)=>{const td=mk('td'); td.id='c'+i+'_'+v; r.appendChild(td);});
+    const tt=mk('td','','tot'); tt.id='tot'+v; r.appendChild(tt);
+  }
+  const tf=t.createTFoot();
+  const foot=[['Honneurs','hon']];
+  if(D.hasChap) foot.push(['Chapelets','chap']);
+  foot.push(['Points','pts']);
+  foot.forEach(([lab,id])=>{
+    const r=tf.insertRow(); r.appendChild(mk('th',lab,'rowh'));
+    const td=mk('td'); td.colSpan=S.ser.length+1; td.id=id; r.appendChild(td);
+  });
+  updateTotals();
+}
+function updateTotals(){
+  const cnt=new Array(D.max+1).fill(0); let hon=0,chap=0,pts=0,n=0,good=0;
+  S.ser.forEach((s,i)=>{
+    if(S.ans[i]===undefined) return;
+    n++; cnt[s.v]++; pts+=s.v; if(s.hon)hon++; if(s.chap)chap++; if(S.ans[i]===s.v)good++;
+  });
+  cnt.forEach((c,v)=>{$('tot'+v).textContent=n?c:'';});
+  $('hon').textContent=n?hon:'';
+  if(D.hasChap) $('chap').textContent=n?chap:'';
+  $('pts').textContent=n?pts:'';
+  const sc=$('score'); sc.replaceChildren();
+  if(n){sc.append('Score ',mk('b',good+' / '+n),' · '+S.ser.length+' flèches');}
+  else sc.textContent=S.ser.length+' flèches à marquer';
+}
+function fillSheet(i){
+  const s=S.ser[i],a=S.ans[i];
+  const right=$('c'+i+'_'+s.v);
+  right.textContent=s.v;
+  if(a===s.v){right.className='ok';}
+  else{
+    right.className='fix';
+    const wrong=$('c'+i+'_'+a); wrong.textContent=a; wrong.className='miss';
+  }
+  $('h'+i).className=(a===s.v)?'okc':'badc';
+  updateTotals();
+}
+function markCurrent(){
+  S.ser.forEach((s,i)=>{
+    $('h'+i).classList.toggle('cur',!S.over && i===S.i && S.ans[i]===undefined);
+  });
+}
+
+function explain(s,given,target){
+  target.replaceChildren();
+  const ok=given===s.v;
+  target.className='feedback '+(ok?'fb-ok':'fb-bad');
+  target.appendChild(mk('div',ok?('Correct : '+s.v+(s.v>1?' points':' point')):('Erreur : vous avez répondu '+given+', la valeur exacte est '+s.v),'verdict '+(ok?'ok':'bad')));
+  target.appendChild(mk('p',D.why[s.key],'why'));
+  target.appendChild(mk('p',s.detail,'meas'));
+  const cp=mk('p');
+  cp.appendChild(mk('span',s.hon?'Honneur':'Pas d\'honneur','chip'+(s.hon?' hon':'')));
+  if(D.hasChap&&s.chap){cp.append(' ');cp.appendChild(mk('span','Chapelet','chip hon'));}
+  target.appendChild(cp);
+  target.appendChild(mk('p',D.ref[s.key],'ref'));
+}
+
+function renderQuestion(){
+  const s=S.ser[S.i];
+  $('quiz').hidden=false; $('end').hidden=true;
+  $('qN').textContent='Flèche '+(S.i+1)+' sur '+S.ser.length;
+  const fb=$('feedback'); fb.replaceChildren(); fb.className='feedback';
+  document.querySelectorAll('#vals button').forEach(b=>{b.disabled=false;b.className='';});
+  showArrow(s,false);
+  markCurrent();
+}
+
+function answer(v){
+  if(S.done||v>D.max) return;
+  const s=S.ser[S.i];
+  S.ans[S.i]=v; S.done=true;
+  document.querySelectorAll('#vals button').forEach(b=>{
+    const bv=+b.dataset.v; b.disabled=true;
+    if(bv===s.v) b.className='right';
+    else if(bv===v) b.className='wrong';
+  });
+  const fb=$('feedback');
+  explain(s,v,fb);
+  const next=mk('button',(S.i===S.ser.length-1)?'Voir le bilan':'Flèche suivante','btn');
+  next.type='button'; next.id='nextBtn';
+  next.addEventListener('click',nextArrow);
+  fb.appendChild(next);
+  showArrow(s,true);
+  fillSheet(S.i);
+  markCurrent();
+  next.focus({preventScroll:true});
+}
+
+function nextArrow(){
+  S.i++; S.done=false;
+  if(S.i>=S.ser.length) renderEnd(); else renderQuestion();
+}
+
+function renderEnd(){
+  S.over=true;
+  $('quiz').hidden=true; $('end').hidden=false;
+  const good=S.ser.filter((s,i)=>S.ans[i]===s.v).length;
+  $('endScore').replaceChildren(good+' ',mk('span','bonnes valeurs sur '+S.ser.length));
+  const fb=$('feedback'); fb.replaceChildren(); fb.className='feedback';
+  S.ser.forEach((s,i)=>{$('h'+i).querySelector('button').disabled=false;});
+  markCurrent();
+}
+
+function review(i){
+  S.ser.forEach((s,k)=>$('h'+k).removeAttribute('aria-current'));
+  $('h'+i).setAttribute('aria-current','true');
+  showArrow(S.ser[i],true);
+  explain(S.ser[i],S.ans[i],$('feedback'));
+}
+
+document.querySelectorAll('.zoom button').forEach(b=>b.addEventListener('click',()=>{
+  zoom=b.dataset.z;
+  try{localStorage.setItem('beursault-zoom',zoom);}catch(e){}
+  applyZoom();
+  if(S.shown) showArrow(S.shown.s,S.shown.highlight);
+}));
+function applyDisc(){
+  applyZoom();
+  document.querySelectorAll('.seg button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.d===D.id)));
+  ['overview','loupe'].forEach(id=>$(id).querySelector('use').setAttribute('href','#'+D.card));
+  $('overview').setAttribute('viewBox',D.vb.join(' '));
+  $('fCard').style.aspectRatio=D.vb[2]+' / '+D.vb[3];
+  $('capName').textContent=D.cap; $('capSize').textContent=D.size;
+  $('legend').textContent=D.legend;
+  const ul=$('ruleList'); ul.replaceChildren();
+  D.rules.forEach(r=>{const li=document.createElement('li'); li.innerHTML=r; ul.appendChild(li);});
+  document.querySelectorAll('#vals button').forEach(b=>{b.hidden=+b.dataset.v>D.max;});
+  $('vals').style.setProperty('--nv',D.max+1);
+}
+
+function start(){
+  applyDisc();
+  S.ser=series(D); S.i=0; S.ans=[]; S.done=false; S.over=false;
+  buildSheet();
+  renderQuestion();
+}
+
+document.querySelectorAll('#vals button').forEach(b=>b.addEventListener('click',()=>answer(+b.dataset.v)));
+document.querySelectorAll('.seg button').forEach(b=>b.addEventListener('click',()=>{
+  if(DISCS[b.dataset.d]===D) return;
+  D=DISCS[b.dataset.d]; start();
+}));
+$('again').addEventListener('click',start);
+document.addEventListener('keydown',e=>{
+  if(e.metaKey||e.ctrlKey||e.altKey) return;
+  if(!$('quiz').hidden && !S.done && /^[0-4]$/.test(e.key)) answer(+e.key);
+});
+start();
+</script>
+
+</body></html>
