@@ -1,5 +1,7 @@
 <!doctype html>
-<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="fr"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="claude:viewport-fit-sides" content="cover">
 <title>Simulateur Beursault</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -164,6 +166,22 @@ table.sheet.vert{min-width:0;max-width:440px;margin:0 auto}
 .sheetsum span{border:1.5px solid var(--line);border-radius:8px;padding:4px 12px;min-width:110px}
 .sheetsum b{color:var(--ink);font-size:16px;margin-left:6px}
 .hit{fill:transparent;cursor:pointer}
+.simu{font-weight:600;color:var(--ink);margin:0 0 8px}
+table.sheet.dense th,table.sheet.dense td{height:21px;font-size:12.5px}
+.sheet td.wr{font-weight:700;color:var(--ink)}
+.sheet td.rat{text-decoration:line-through;color:var(--muted)}
+.sheet th.visa,.sheet td.visa{width:34px;font-size:11px;color:var(--ok)}
+.tap{cursor:pointer}
+.sheet .tap:hover,.sheetsum .tap:hover{background:var(--bg)}
+.flag{outline:2.5px solid var(--hl);outline-offset:-2px;background:var(--bad-bg)}
+.chk-found{outline:2.5px solid var(--ok)!important;background:var(--ok-bg)!important}
+.chk-missed{outline:2.5px solid var(--bad)!important;background:var(--bad-bg)!important}
+.chk-false{outline:2.5px dashed var(--muted)!important}
+.sigs{display:flex;gap:8px;justify-content:center;margin-top:10px;flex-wrap:wrap}
+.sigb{font-family:var(--font-mono);font-size:13px;padding:6px 12px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.sigb.blank{color:var(--muted)}
+ul.chk{margin:8px 0 0;padding-left:0;list-style:none;font-size:14px}
+ul.chk li.f{color:var(--ok)}ul.chk li.m{color:var(--bad)}
 .halo{fill:none;stroke:var(--hl);stroke-width:1.2;stroke-dasharray:3 2}
 .zoom{display:flex;gap:4px}
 .zoom button{font-family:var(--font-head);font-weight:600;font-size:13px;letter-spacing:.02em;text-transform:none;padding:2px 10px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
@@ -209,7 +227,8 @@ footer{font-size:12px;color:var(--muted);max-width:90ch}
 }
 
 </style>
-</head><body>
+</head>
+<body>
 
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
@@ -272,12 +291,13 @@ footer{font-size:12px;color:var(--muted);max-width:90ch}
       <div class="seg" id="modeSeg" role="group" aria-label="Palier">
         <button type="button" data-m="1" aria-pressed="true">Palier 1 · une flèche</button>
         <button type="button" data-m="2" aria-pressed="false">Palier 2 · cinq archers</button>
+        <button type="button" data-m="3" aria-pressed="false">Palier 3 · contrôle d'une feuille</button>
       </div>
     </div>
     <details class="more" id="more"><summary>À retenir (règles de marquage)</summary><ul id="ruleList"></ul></details>
   </section>
 
-  <section class="panel stick" aria-label="Carte et loupe">
+  <section class="panel stick" id="stickPanel" aria-label="Carte et loupe">
     <div class="mid">
       <figure>
         <figcaption><span id="capName">Carte de championnat</span><span id="capSize">50 × 70 cm</span></figcaption>
@@ -328,6 +348,12 @@ footer{font-size:12px;color:var(--muted);max-width:90ch}
         <p class="hint" id="endHint"></p>
         <button type="button" class="btn" id="again" style="margin-top:12px">Nouvelle série</button>
       </div>
+      <div id="p3box" hidden>
+        <div class="q-top"><h2 class="q">Cette feuille est-elle correcte ?</h2><span class="n">40 flèches</span></div>
+        <p class="said">Feuille remplie à contrôler, comme dans le référentiel : une partie complète de 40 flèches. Touchez sur la feuille chaque élément qui vous paraît faux (numéro de ligne, case HON ou Pts, total, signature), puis validez. S'il n'y a rien à signaler, validez directement.</p>
+        <p class="hint" id="flagCount"></p>
+        <div class="acts"><button type="button" class="btn" id="check3">Valider mon contrôle</button><button type="button" class="btn" id="again3" hidden>Nouvelle feuille</button></div>
+      </div>
       <div class="feedback" id="feedback" aria-live="polite"></div>
     </div>
 
@@ -336,13 +362,15 @@ footer{font-size:12px;color:var(--muted);max-width:90ch}
         <h2 class="q">Feuille de marque</h2>
         <span class="score" id="score"></span>
       </div>
+      <p class="hint simu" id="simu"></p>
       <div class="tabs" id="tabs" role="tablist" aria-label="Feuille de marque de chaque archer" hidden></div>
       <div class="scroll"><table class="sheet" id="sheet" aria-label="Feuille de marque de la série"></table></div>
-      <div class="sheetsum"><span>Honneurs <b id="hon"></b></span><span id="chapW">Chapelets <b id="chap"></b></span><span>Points <b id="pts"></b></span></div>
+      <div class="sheetsum"><span id="sHon">Honneurs <b id="hon"></b></span><span id="chapW"><span id="sChap" style="border:0;padding:0;min-width:0">Chapelets <b id="chap"></b></span></span><span id="sPts">Points <b id="pts"></b></span></div>
+      <div class="sigs" id="sigs" hidden></div>
     </div>
   </section>
 
-  <footer>Prototype de travail : palier 1 (valeur d'une flèche) et palier 2 (cinq archers : flèche et valeur retenues par le marqueur), sur la carte Beursault de championnat et sur la carte du Bouquet (règlement FFTA). Les impacts sont tirés au hasard, avec au moins 0,8 mm d'écart avec chaque limite pour qu'aucune décision ne soit ambiguë à l'écran.</footer>
+  <footer>Prototype de travail : palier 1 (valeur d'une flèche), palier 2 (cinq archers : flèche et valeur retenues par le marqueur) et palier 3 (contrôle d'une feuille remplie), sur la carte Beursault de championnat et sur la carte du Bouquet (règlement FFTA). Les impacts sont tirés au hasard, avec au moins 0,8 mm d'écart avec chaque limite pour qu'aucune décision ne soit ambiguë à l'écran.</footer>
 </div>
 
 <script>
@@ -509,13 +537,14 @@ function sample(D){
   return Object.assign({d,x,y},D.classify(d));
 }
 function series(D,n=10){
+  const maxSame=Math.ceil(D.maxSame*n/10),minTouch=Math.ceil(4*n/10);
   let a=[];
   for(let t=0;t<500;t++){
     a=[];
     while(a.length<n){const s=sample(D); if(s)a.push(s);}
     const cnt=new Array(D.max+1).fill(0); a.forEach(s=>cnt[s.v]++);
     const touch=a.filter(s=>D.touch.test(s.key)).length;
-    if(cnt.every(c=>c>0) && Math.max(...cnt)<=D.maxSame && touch>=4) return a;
+    if(cnt.every(c=>c>0) && Math.max(...cnt)<=maxSame && touch>=minTouch) return a;
   }
   return a;
 }
@@ -537,22 +566,24 @@ function wrongValue(D,s){
   const c=[s.v-1,s.v+1].filter(x=>x>=0&&x<=D.max);
   return c[(Math.random()*c.length)|0];
 }
+const ROUNDS=5;
 function spacedRounds(a){
-  for(const h of [0,5]) for(let i=h;i<h+5;i++) for(let j=i+1;j<h+5;j++){
+  for(let h=0;h<a.length;h+=5) for(let i=h;i<h+5;i++) for(let j=i+1;j<h+5;j++){
     if(Math.hypot(a[i].x-a[j].x,a[i].y-a[j].y)<13) return false;
   }
   return true;
 }
-/* 2 volées de 5 flèches ; la flèche i d'une volée est celle de l'archer i%5.
+/* 5 flèches par archer (ROUNDS x 5) ; la flèche i d'une ronde est celle de l'archer i%5.
    s.take = flèche réellement prise par le marqueur, s.ann = valeur annoncée, s.err = null | 'value' | 'arrow' */
 function seriesP2(D){
+  const N=ROUNDS*5;
   let a=[];
-  for(let t=0;t<1500;t++){
-    a=series(D,10);
+  for(let t=0;t<3000;t++){
+    a=series(D,N);
     if(!spacedRounds(a)) continue;
-    a.forEach((s,i)=>{s.round=i<5?0:1;s.arch=i%5;s.rot=Math.random()*Math.PI*2;s.take=s;s.ann=s.v;s.err=null;});
-    const nErr=2+((Math.random()*4)|0);
-    const idx=shuffle([0,1,2,3,4,5,6,7,8,9]).slice(0,nErr);
+    a.forEach((s,i)=>{s.round=Math.floor(i/5);s.arch=i%5;s.rot=Math.random()*Math.PI*2;s.take=s;s.ann=s.v;s.err=null;});
+    const nErr=5+((Math.random()*6)|0);
+    const idx=shuffle(a.map((s,i)=>i)).slice(0,nErr);
     let nv=0,na=0;
     idx.forEach(i=>{
       const s=a[i],base=s.round*5;
@@ -560,7 +591,7 @@ function seriesP2(D){
       if(cand.length&&Math.random()<0.5){const o=cand[(Math.random()*cand.length)|0];s.take=o;s.ann=o.v;s.err='arrow';na++;}
       else{s.ann=wrongValue(D,s);s.err='value';nv++;}
     });
-    if(nv>=1&&na>=1) return a;
+    if(nv>=2&&na>=2) return a;
   }
   return a;
 }
@@ -626,6 +657,7 @@ function showArrow(s,highlight){
 
 /* ---- palier 2 : cinq archers ---- */
 const roundOf=r=>S.ser.slice(r*5,r*5+5);
+const NR=()=>S.ser.length/5;
 function drawLoupeArrow(g,o){
   const c=ARCH[o.arch];
   g.appendChild(el('circle',{cx:o.x,cy:o.y,r:RA,class:'shaft'}));
@@ -744,6 +776,7 @@ function updateTotals(){
   const sc=$('score'); sc.replaceChildren();
   if(n){sc.append('Score ',mk('b',good+' / '+n),' · '+S.ser.length+' flèches');}
   else sc.textContent=S.ser.length+' flèches à marquer';
+  $('simu').textContent='Simulation de '+S.ser.length+' flèches à marquer sur 40.';
 }
 function fillSheet(i){
   const s=S.ser[i],a=S.ans[i];
@@ -782,14 +815,14 @@ function renderSheet2(){
     const b=$('tab'+a);
     b.setAttribute('aria-selected',String(a===k));
     const pp=b.querySelector('.pips'); pp.replaceChildren();
-    for(let r=0;r<2;r++){
+    for(let r=0;r<NR();r++){
       const rs=S.res[r*5+a];
       pp.appendChild(mk('i','','pip'+(rs?(rs.ok?' ok':' bad'):'')));
     }
   }
-  vTable([0,1].map(r=>({idx:r*5+k,cp:r,label:String(r+1),aria:'Revoir la volée '+(r+1)+' de l\'archer '+(k+1)})),S.over);
+  vTable(Array.from({length:NR()},(_,r)=>r).map(r=>({idx:r*5+k,cp:r,label:String(r+1),aria:'Revoir la volée '+(r+1)+' de l\'archer '+(k+1)})),S.over);
   const list=[];
-  for(let r=0;r<2;r++){
+  for(let r=0;r<NR();r++){
     const idx=r*5+k,rs=S.res[idx],s=S.ser[idx];
     const th=$('h'+idx);
     if(!rs){ if(!S.over&&!S.done&&idx===S.i) th.className='cur'; continue; }
@@ -803,6 +836,7 @@ function renderSheet2(){
   const sc=$('score'); sc.replaceChildren();
   if(done){sc.append('Score ',mk('b',good+' / '+done),' · '+S.ser.length+' décisions');}
   else sc.textContent=S.ser.length+' décisions à prendre';
+  $('simu').textContent='Simulation de '+S.ser.length+' flèches à marquer sur 40 : 5 volées de 5 archers, soit 5 flèches par archer.';
 }
 
 /* ---- retours ---- */
@@ -852,7 +886,7 @@ function renderQuestion(){
   const fb=$('feedback'); fb.replaceChildren(); fb.className='feedback';
   document.querySelectorAll('#vals button').forEach(b=>{b.disabled=false;b.className='';});
   if(S.mode===2){
-    $('qN').textContent='Archer '+(s.arch+1)+' · volée '+(s.round+1)+' sur 2';
+    $('qN').textContent='Archer '+(s.arch+1)+' · volée '+(s.round+1)+' sur '+NR();
     $('p2').hidden=false;
     $('validate').disabled=false;
     const w=$('who'); w.replaceChildren();
@@ -938,7 +972,7 @@ function renderEnd(){
     const fa=S.ser.filter((s,i)=>!s.err&&!S.res[i].ok).length;
     det.textContent='Erreurs du marqueur : '+errs.length+' (dont '+errs.filter(s=>s.err==='arrow').length+' mauvaise(s) flèche(s)), détectées : '+caught+'. Fausses alertes : '+fa+'.';
     det.hidden=false;
-    $('endHint').textContent='Choisissez un archer, puis V1 ou V2 dans sa feuille pour revoir la décision à la loupe.';
+    $('endHint').textContent='Choisissez un archer, puis un numéro de volée dans sa feuille pour revoir la décision à la loupe.';
   }else{
     det.hidden=true;
     $('endHint').textContent='Cliquez sur un numéro de flèche dans la feuille pour la revoir à la loupe.';
@@ -978,7 +1012,8 @@ function applyDisc(){
   $('fCard').style.aspectRatio=D.vb[2]+' / '+D.vb[3];
   $('capName').textContent=D.cap; $('capSize').textContent=D.size;
   const ul=$('ruleList'); ul.replaceChildren();
-  const rules=D.rules.slice();
+  let rules=D.rules.slice();
+  if(S.mode===3) rules=sheetRules();
   if(S.mode===2) rules.push('<b>Votre rôle :</b> le marqueur suit toujours l\'ordre des feuilles (archer 1 à 5). Vérifiez qu\'il prend la flèche aux couleurs de l\'archer, puis qu\'il annonce la bonne valeur.');
   rules.forEach(r=>{const li=document.createElement('li'); li.innerHTML=r; ul.appendChild(li);});
   $('legend').textContent=S.mode===2
@@ -990,14 +1025,212 @@ function applyDisc(){
   document.querySelectorAll('#vals button').forEach(b=>{b.hidden=+b.dataset.v>D.max;});
   $('vals').style.setProperty('--nv',D.max+1);
   $('tabs').hidden=S.mode!==2;
+  $('stickPanel').hidden=S.mode===3;
+  $('p3box').hidden=S.mode!==3;
+  $('sigs').hidden=S.mode!==3;
+  $('simu').hidden=S.mode===3;
+  if(S.mode===3){$('quiz').hidden=true;$('end').hidden=true;}
+  $('sheet').classList.toggle('dense',S.mode===3);
+}
+function sheetRules(){
+  const vis=D.id==='bouquet'?'le responsable':'l\'arbitre';
+  const r=[
+    'Une ligne = une flèche : une seule valeur par ligne, ni ligne vide ni double inscription.',
+    'Sous chaque colonne, <b>HON</b> donne le nombre de flèches de la colonne, et <b>Pts</b> ce nombre multiplié par la valeur de la colonne.',
+    'Le total des <b>honneurs</b> additionne les colonnes de 1 point et plus'+(D.hasChap?' ; les <b>chapelets</b> sont les flèches de 2 et 3 points':'')+' ; les <b>points</b> additionnent la ligne Pts.',
+    'La feuille est signée par l\'archer et par le marqueur ; toute rature doit être contresignée par '+vis+'.'
+  ];
+  return r;
 }
 
 function start(){
   applyDisc();
+  if(S.mode===3){ $('tabs').hidden=true; start3(); return; }
+  ['sHon','sChap','sPts'].forEach(id=>{const e=$(id);e.classList.remove('tap','flag','chk-found','chk-missed','chk-false');e.onclick=null;e.onkeydown=null;e.removeAttribute('tabindex');e.removeAttribute('role');});
   S.i=0; S.ans=[]; S.res=[]; S.done=false; S.over=false; S.shown=null; S.insp=null; S.tab=0;
   if(S.mode===2){ S.ser=seriesP2(D); buildTabs(); }
   else { S.ser=series(D); buildSheet(); }
   renderQuestion();
+}
+
+/* ---- palier 3 : contrôle d'une feuille de marque déjà remplie (40 flèches, comme dans le référentiel) ---- */
+const N3=40;
+function gen3(D){
+  const W=D.max===4?[22,26,22,16,14]:[30,36,24,10];
+  const tot=W.reduce((a,b)=>a+b,0);
+  const pickV=()=>{let r=Math.random()*tot;for(let v=0;v<W.length;v++){r-=W[v];if(r<0)return v;}return 0;};
+  const rows=[];
+  for(let i=0;i<N3;i++) rows.push({v:pickV(),mark:null,old:null,visa:null});
+  const idx=shuffle(rows.map((r,i)=>i));
+  // 1 ou 2 ratures régulières (visées), valeur barrée différente de la valeur finale
+  const nRat=1+((Math.random()*2)|0);
+  const ratIdx=idx.splice(0,nRat);
+  ratIdx.forEach(i=>{const r=rows[i];r.old=(r.v+1+((Math.random()*D.max)|0))%(D.max+1);r.visa=true;});
+  const errs=[];
+  const nErr=[0,1,1,2,2,3][(Math.random()*6)|0];
+  const kinds=shuffle(['empty','visa','colHon','colPts','totHon',D.hasChap?'totChap':'totPts','totPts','sigA','sigM']).filter((k,j,a)=>a.indexOf(k)===j);
+  const chosen=kinds.slice(0,nErr);
+  rows.forEach(r=>{r.mark=r.v;});
+  chosen.forEach(k=>{
+    if(k==='empty'){const i=idx.shift();rows[i].mark=null;errs.push({k,t:'r'+i,i});}
+    else if(k==='visa'){
+      let i=idx.shift();const r=rows[i];
+      r.old=(r.v+1+((Math.random()*D.max)|0))%(D.max+1);r.visa=false;errs.push({k,t:'r'+i,i});
+    }
+  });
+  // effectifs affichés = valeurs écrites
+  const cnt=new Array(D.max+1).fill(0);
+  rows.forEach(r=>{if(r.mark!==null)cnt[r.mark]++;});
+  const hon=cnt.slice(), pts=cnt.map((c,v)=>v?c*v:null);
+  const sums={};
+  const sig={A:true,M:true};
+  chosen.forEach(k=>{
+    const d=()=>{const m=1+((Math.random()*2)|0);return Math.random()<.5?-m:m;};
+    if(k==='colHon'){
+      const v=1+((Math.random()*D.max)|0),real=hon[v];hon[v]=Math.max(0,real+(real===0?1:d()));
+      if(hon[v]===real)hon[v]++;
+      errs.push({k,t:'h'+v,v,shown:hon[v],real,neutral:['p'+v]});
+    }
+    if(k==='colPts'){
+      const v=1+((Math.random()*D.max)|0),real=hon[v]*v;let sh=real+(Math.random()<.5?-1:1)*(Math.random()<.5?1:v);
+      if(sh===real||sh<0)sh=real+v;
+      pts[v]=sh;errs.push({k,t:'p'+v,v,shown:sh,real,n:hon[v]});
+    }
+    if(k==='sigA'){sig.A=false;errs.push({k,t:'SA'});}
+    if(k==='sigM'){sig.M=false;errs.push({k,t:'SM'});}
+  });
+  // totaux cohérents avec les colonnes affichées, puis éventuellement faussés
+  let H=0,C=0,P=0;
+  for(let v=1;v<=D.max;v++){H+=hon[v]; if(v>=2&&D.hasChap)C+=hon[v]; P+=pts[v];}
+  // colPts erroné : le total points (affiché) suit les cases affichées
+  sums.hon=H;sums.chap=D.hasChap?C:null;sums.pts=P;
+  const realH=H,realC=C,realP=P;
+  const bump=x=>x+(Math.random()<.5?-1:1)*(1+((Math.random()*3)|0));
+  chosen.forEach(k=>{
+    if(k==='totHon'){sums.hon=Math.max(0,bump(realH));if(sums.hon===realH)sums.hon++;errs.push({k,t:'Thon',shown:sums.hon,real:realH});}
+    if(k==='totChap'){sums.chap=Math.max(0,bump(realC));if(sums.chap===realC)sums.chap++;errs.push({k,t:'Tchap',shown:sums.chap,real:realC});}
+    if(k==='totPts'){sums.pts=Math.max(0,bump(realP));if(sums.pts===realP)sums.pts++;errs.push({k,t:'Tpts',shown:sums.pts,real:realP});}
+  });
+  return {rows,hon,pts,sums,sig,errs};
+}
+function sheet3Build(){
+  const sh=S.sh3,t=$('sheet'); t.replaceChildren(); t.className='sheet vert dense';
+  S.cells={};
+  const tap=(td,key,label)=>{
+    td.classList.add('tap'); td.tabIndex=0; td.setAttribute('role','button'); td.setAttribute('aria-label',label);
+    td.addEventListener('click',()=>toggle3(key));
+    td.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle3(key);}});
+    (S.cells[key]=S.cells[key]||[]).push(td);
+  };
+  const hr=t.createTHead().insertRow();
+  hr.appendChild(mk('th','FL','rowh'));
+  for(let v=0;v<=D.max;v++) hr.appendChild(mk('th',String(v)));
+  hr.appendChild(mk('th','Visa','visa'));
+  const tb=t.createTBody();
+  sh.rows.forEach((r,i)=>{
+    const tr=tb.insertRow();
+    const th=mk('th',String(i+1)); tap(th,'r'+i,'Ligne '+(i+1)); tr.appendChild(th);
+    for(let v=0;v<=D.max;v++){
+      const td=mk('td');
+      if(r.old===v){td.textContent=v;td.className='rat';}
+      else if(r.mark===v){td.textContent=v;td.className='wr';}
+      tr.appendChild(td);
+    }
+    const vs=mk('td',r.old!==null&&r.visa?'✓':'','visa');
+    tr.appendChild(vs);
+  });
+  const tf=t.createTFoot();
+  const r1=tf.insertRow(); r1.appendChild(mk('th','HON','rowh'));
+  for(let v=0;v<=D.max;v++){const td=mk('td',String(sh.hon[v])); tap(td,'h'+v,'HON colonne '+v); r1.appendChild(td);}
+  r1.appendChild(mk('td','','visa'));
+  const r2=tf.insertRow(); r2.appendChild(mk('th','','rowh'));
+  for(let v=0;v<=D.max;v++) r2.appendChild(mk('td',v?('× '+v):'','mult'));
+  r2.appendChild(mk('td','','visa'));
+  const r3=tf.insertRow(); r3.appendChild(mk('th','Pts','rowh'));
+  for(let v=0;v<=D.max;v++){const td=mk('td',v?String(sh.pts[v]):''); if(v)tap(td,'p'+v,'Points colonne '+v); r3.appendChild(td);}
+  r3.appendChild(mk('td','','visa'));
+  $('chapW').hidden=!D.hasChap;
+  $('hon').textContent=sh.sums.hon; $('pts').textContent=sh.sums.pts;
+  if(D.hasChap) $('chap').textContent=sh.sums.chap;
+  [['sHon','Thon'],['sChap','Tchap'],['sPts','Tpts']].forEach(([id,key])=>{
+    const sp=$(id); sp.classList.add('tap'); sp.tabIndex=0; sp.setAttribute('role','button');
+    sp.onclick=()=>toggle3(key);
+    sp.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle3(key);}};
+    (S.cells[key]=S.cells[key]||[]).push(sp);
+  });
+  const sg=$('sigs'); sg.replaceChildren();
+  [['A','Archer'],['M','Marqueur']].forEach(([c,lab])=>{
+    const b=mk('button',lab+' : '+(sh.sig[c]?'signé ✓':'non signé'),'sigb'+(sh.sig[c]?'':' blank')); b.type='button';
+    b.onclick=()=>toggle3('S'+c);
+    (S.cells['S'+c]=S.cells['S'+c]||[]).push(b); sg.appendChild(b);
+  });
+}
+function toggle3(key){
+  if(S.over) return;
+  if(S.flags.has(key)) S.flags.delete(key); else S.flags.add(key);
+  paint3();
+}
+function paint3(){
+  Object.keys(S.cells).forEach(k=>S.cells[k].forEach(c=>c.classList.toggle('flag',S.flags.has(k))));
+  const n=S.flags.size;
+  $('flagCount').textContent=n?(n+(n>1?' éléments signalés.':' élément signalé.')):'Aucun élément signalé pour l\'instant.';
+  $('check3').textContent=n?'Valider mon contrôle':'Valider : la feuille est correcte';
+  const sc=$('score'); sc.replaceChildren();
+  sc.textContent=S.over?'Contrôle terminé':'Contrôle en cours';
+}
+function describe3(e){
+  const D3=D;
+  switch(e.k){
+    case 'empty': return 'Ligne '+(e.i+1)+' : aucune valeur inscrite pour cette flèche.';
+    case 'visa': return 'Ligne '+(e.i+1)+' : une rature n\'est pas contresignée (visa manquant).';
+    case 'colHon': return 'Colonne '+e.v+' : HON indique '+e.shown+', mais la colonne contient '+e.real+' marque(s).';
+    case 'colPts': return 'Colonne '+e.v+' : Pts indique '+e.shown+', or '+e.n+' × '+e.v+' = '+e.real+'.';
+    case 'totHon': return 'Honneurs : '+e.shown+' indiqué, la somme de HON (colonnes 1 à '+D3.max+') donne '+e.real+'.';
+    case 'totChap': return 'Chapelets : '+e.shown+' indiqué, les colonnes 2 et 3 donnent '+e.real+'.';
+    case 'totPts': return 'Points : '+e.shown+' indiqué, la somme de la ligne Pts donne '+e.real+'.';
+    case 'sigA': return 'La signature de l\'archer manque.';
+    case 'sigM': return 'La signature du marqueur manque.';
+  }
+}
+function falseLabel3(k){
+  if(k[0]==='r') return 'ligne '+(+k.slice(1)+1);
+  if(k[0]==='h') return 'HON, colonne '+k.slice(1);
+  if(k[0]==='p') return 'Pts, colonne '+k.slice(1);
+  if(k==='Thon') return 'total des honneurs';
+  if(k==='Tchap') return 'total des chapelets';
+  if(k==='Tpts') return 'total des points';
+  return k==='SA'?'signature de l\'archer':'signature du marqueur';
+}
+function check3(){
+  if(S.over) return;
+  S.over=true;
+  const E=S.sh3.errs, tset=new Set(E.map(e=>e.t));
+  const neutral=new Set(); E.forEach(e=>(e.neutral||[]).forEach(x=>neutral.add(x)));
+  const found=E.filter(e=>S.flags.has(e.t)), missed=E.filter(e=>!S.flags.has(e.t));
+  const fals=[...S.flags].filter(k=>!tset.has(k)&&!neutral.has(k));
+  E.forEach(e=>(S.cells[e.t]||[]).forEach(c=>c.classList.add(S.flags.has(e.t)?'chk-found':'chk-missed')));
+  fals.forEach(k=>(S.cells[k]||[]).forEach(c=>c.classList.add('chk-false')));
+  const fb=$('feedback'); fb.replaceChildren();
+  const perfect=!missed.length&&!fals.length;
+  fb.className='feedback '+(perfect?'fb-ok':'fb-bad');
+  fb.appendChild(mk('div',E.length?(found.length+' erreur'+(found.length>1?'s':'')+' trouvée'+(found.length>1?'s':'')+' sur '+E.length):(fals.length?'Feuille sans erreur : fausse alerte':'Feuille sans erreur'),
+    'verdict '+(perfect?'ok':'bad')));
+  if(!E.length) fb.appendChild(mk('p',fals.length?'Cette feuille était correcte : vous avez signalé à tort '+fals.map(falseLabel3).join(', ')+'.':'Bien vu : toutes les lignes, colonnes, totaux et signatures sont conformes.','annnote'));
+  else{
+    const ul=mk('ul','','chk');
+    E.forEach(e=>{const li=mk('li',(S.flags.has(e.t)?'✓ ':'✗ ')+describe3(e));li.className=S.flags.has(e.t)?'f':'m';ul.appendChild(li);});
+    fb.appendChild(ul);
+    if(fals.length) fb.appendChild(mk('p','Signalé à tort : '+fals.map(falseLabel3).join(', ')+'.','annnote'));
+  }
+  $('check3').hidden=true; $('again3').hidden=false;
+  paint3();
+}
+function start3(){
+  S.sh3=gen3(D); S.flags=new Set(); S.over=false;
+  sheet3Build();
+  $('feedback').replaceChildren(); $('feedback').className='feedback';
+  $('check3').hidden=false; $('again3').hidden=true;
+  paint3();
 }
 
 document.querySelectorAll('#vals button').forEach(b=>b.addEventListener('click',()=>answer(+b.dataset.v)));
@@ -1020,8 +1253,12 @@ document.addEventListener('keydown',e=>{
   if(/^[0-4]$/.test(e.key)) answer(+e.key);
   else if((e.key==='v'||e.key==='V')&&S.mode===2) decide('validate');
 });
+$('check3').addEventListener('click',check3);
+$('again3').addEventListener('click',start);
 try{ if(window.matchMedia('(min-width:701px)').matches) $('more').open=true; }catch(e){}
 start();
+
+
 </script>
 
 </body></html>
