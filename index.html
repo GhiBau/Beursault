@@ -166,6 +166,22 @@ table.sheet.vert{min-width:0;max-width:440px;margin:0 auto}
 .sheetsum span{border:1.5px solid var(--line);border-radius:8px;padding:4px 12px;min-width:110px}
 .sheetsum b{color:var(--ink);font-size:16px;margin-left:6px}
 .hit{fill:transparent;cursor:pointer}
+#home{display:none}
+.onhome #home{display:block}
+.onhome .rule,.onhome .stick,.onhome .bot{display:none!important}
+.home h1{margin:2px 0 10px;font-size:34px}
+.home .eyebrow{margin:0;font-family:var(--font-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.home .lead{max-width:70ch;margin:0 0 16px}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:800px){.cards{grid-template-columns:minmax(0,1fr)}}
+.pcard{display:flex;flex-direction:column;gap:8px;align-items:flex-start;text-align:left;font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:10px;padding:14px 16px;cursor:pointer}
+.pcard:hover,.pcard:focus-visible{border-color:var(--ink)}
+.pcard .num{font-family:var(--font-mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.pcard b{font-family:var(--font-head);font-size:22px}
+.pcard .vol{font-weight:600;font-size:14px}
+.pcard .go{margin-top:auto;font-family:var(--font-head);font-weight:600;background:var(--accent);color:var(--accent-ink);padding:6px 14px;border-radius:6px}
+.homebtn{justify-self:start;margin-top:6px;font-family:var(--font-head);font-weight:600;font-size:14px;padding:3px 10px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.homebtn{display:block}
 .simu{font-weight:600;color:var(--ink);margin:0 0 8px}
 table.sheet.dense th,table.sheet.dense td{height:21px;font-size:12.5px}
 .sheet td.wr{font-weight:700;color:var(--ink)}
@@ -281,10 +297,21 @@ footer{font-size:12px;color:var(--muted);max-width:90ch}
 </svg>
 
 <div class="wrap">
+  <section class="panel home" id="home" aria-label="Accueil">
+    <p class="eyebrow">Spécialité arbitre</p>
+    <h1>Simulateur Beursault</h1>
+    <p class="lead">Entraînez-vous au marquage des points sur la carte Beursault de championnat et sur la carte du Bouquet, en trois paliers de difficulté croissante. Vous pouvez changer de carte et de palier à tout moment.</p>
+    <div class="cards">
+      <button type="button" class="pcard" data-go="1"><span class="num">Palier 1</span><b>Un impact, un score</b><span>Une flèche est plantée dans la carte : quelle valeur faut-il annoncer ? Le cordon joue contre l'archer, sauf pour le noir.</span><span class="vol">Simulation de 10 flèches à marquer sur 40</span><span class="go">Commencer</span></button>
+      <button type="button" class="pcard" data-go="2"><span class="num">Palier 2</span><b>Cinq archers</b><span>Le marqueur traite toujours les archers dans le même ordre. Vérifiez qu'il prend la bonne flèche, reconnaissable à ses plumes et à son encoche, et qu'il lui attribue la bonne valeur.</span><span class="vol">Simulation de 5 volées de 5 archers, soit 5 flèches par archer sur 40</span><span class="go">Commencer</span></button>
+      <button type="button" class="pcard" data-go="3"><span class="num">Palier 3</span><b>Contrôle d'une feuille</b><span>Une feuille de marque de 40 flèches est déjà remplie : repérez les lignes mal inscrites, les ratures sans visa, les colonnes, les totaux d'honneurs, de chapelets et de points, les signatures.</span><span class="vol">Une partie complète, 40 flèches</span><span class="go">Commencer</span></button>
+    </div>
+  </section>
   <section class="panel rule" aria-label="À retenir">
     <div class="ttl">
       <p>Spécialité arbitre</p>
       <h1>Simulateur Beursault</h1>
+      <button type="button" class="homebtn" id="homeBtn">← Accueil</button>
       <div class="seg" id="discSeg" role="group" aria-label="Carte à marquer">
         <button type="button" data-d="beursault" aria-pressed="true">Carte Beursault</button>
         <button type="button" data-d="bouquet" aria-pressed="false">Carte du Bouquet</button>
@@ -1266,6 +1293,15 @@ document.addEventListener('keydown',e=>{
   else if((e.key==='v'||e.key==='V')&&S.mode===2) decide('validate');
 });
 $('check3').addEventListener('click',check3);
+const showHome=on=>{document.body.classList.toggle('onhome',on);};
+const top0=()=>{try{window.scrollTo(0,0);}catch(e){}};
+$('homeBtn').addEventListener('click',()=>{showHome(true);top0();});
+document.querySelectorAll('.pcard').forEach(b=>b.addEventListener('click',()=>{
+  const m=+b.dataset.go; showHome(false);
+  if(S.mode!==m){S.mode=m; start();}
+  top0();
+}));
+showHome(true);
 $('again3').addEventListener('click',start);
 try{ if(window.matchMedia('(min-width:701px)').matches) $('more').open=true; }catch(e){}
 start();
