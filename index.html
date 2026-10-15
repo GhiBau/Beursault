@@ -169,7 +169,8 @@ table.sheet.vert{min-width:0;max-width:440px;margin:0 auto}
 .simu{font-weight:600;color:var(--ink);margin:0 0 8px}
 table.sheet.dense th,table.sheet.dense td{height:21px;font-size:12.5px}
 .sheet td.wr{font-weight:700;color:var(--ink)}
-.sheet td.rat{text-decoration:line-through;color:var(--muted)}
+.sheet td.rat{text-decoration:line-through;color:#d22;font-weight:700}
+.sheet td.red{color:#d22}
 .sheet th.visa,.sheet td.visa{width:34px;font-size:11px;color:var(--ok)}
 .tap{cursor:pointer}
 .sheet .tap:hover,.sheetsum .tap:hover{background:var(--bg)}
@@ -350,7 +351,7 @@ footer{font-size:12px;color:var(--muted);max-width:90ch}
       </div>
       <div id="p3box" hidden>
         <div class="q-top"><h2 class="q">Cette feuille est-elle correcte ?</h2><span class="n">40 flèches</span></div>
-        <p class="said">Feuille remplie à contrôler, comme dans le référentiel : une partie complète de 40 flèches. Touchez sur la feuille chaque élément qui vous paraît faux (numéro de ligne, case HON ou Pts, total, signature), puis validez. S'il n'y a rien à signaler, validez directement.</p>
+        <p class="said">Feuille remplie à contrôler, comme dans le référentiel : une partie complète de 40 flèches. Touchez sur la feuille chaque élément qui vous paraît faux (numéro de ligne, case Honneurs ou Points d'une colonne, total, signature), puis validez. S'il n'y a rien à signaler, validez directement.</p>
         <p class="hint" id="flagCount"></p>
         <div class="acts"><button type="button" class="btn" id="check3">Valider mon contrôle</button><button type="button" class="btn" id="again3" hidden>Nouvelle feuille</button></div>
       </div>
@@ -1036,9 +1037,9 @@ function sheetRules(){
   const vis=D.id==='bouquet'?'le responsable':'l\'arbitre';
   const r=[
     'Une ligne = une flèche : une seule valeur par ligne, ni ligne vide ni double inscription.',
-    'Sous chaque colonne, <b>HON</b> donne le nombre de flèches de la colonne, et <b>Pts</b> ce nombre multiplié par la valeur de la colonne.',
-    'Le total des <b>honneurs</b> additionne les colonnes de 1 point et plus'+(D.hasChap?' ; les <b>chapelets</b> sont les flèches de 2 et 3 points':'')+' ; les <b>points</b> additionnent la ligne Pts.',
-    'La feuille est signée par l\'archer et par le marqueur ; toute rature doit être contresignée par '+vis+'.'
+    'Sous chaque colonne, la ligne <b>Honneurs</b> donne le nombre de flèches de la colonne, et la ligne <b>Points</b> ce nombre multiplié par la valeur de la colonne.',
+    'Le total des <b>honneurs</b> additionne les colonnes de 1 point et plus'+(D.hasChap?' ; les <b>chapelets</b> sont les flèches de 2 et 3 points':'')+' ; les <b>points</b> additionnent la ligne Points.'+'',
+    'La feuille est signée par l\'archer et par le marqueur ; toute rature, faite au crayon rouge pour corriger une valeur, doit être contresignée par '+vis+'.'
   ];
   return r;
 }
@@ -1133,7 +1134,7 @@ function sheet3Build(){
     for(let v=0;v<=D.max;v++){
       const td=mk('td');
       if(r.old===v){td.textContent=v;td.className='rat';}
-      else if(r.mark===v){td.textContent=v;td.className='wr';}
+      else if(r.mark===v){td.textContent=v;td.className=r.old!==null?'wr red':'wr';}
       tr.appendChild(td);
     }
     const vs=mk('td',r.old!==null&&r.visa?'✓':'','visa');
@@ -1141,13 +1142,13 @@ function sheet3Build(){
   });
   const tf=t.createTFoot();
   const r1=tf.insertRow(); r1.appendChild(mk('th','HON','rowh'));
-  for(let v=0;v<=D.max;v++){const td=mk('td',String(sh.hon[v])); tap(td,'h'+v,'HON colonne '+v); r1.appendChild(td);}
+  for(let v=0;v<=D.max;v++){const td=mk('td',String(sh.hon[v])); tap(td,'h'+v,'Honneurs, colonne '+v); r1.appendChild(td);}
   r1.appendChild(mk('td','','visa'));
   const r2=tf.insertRow(); r2.appendChild(mk('th','','rowh'));
   for(let v=0;v<=D.max;v++) r2.appendChild(mk('td',v?('× '+v):'','mult'));
   r2.appendChild(mk('td','','visa'));
   const r3=tf.insertRow(); r3.appendChild(mk('th','Pts','rowh'));
-  for(let v=0;v<=D.max;v++){const td=mk('td',v?String(sh.pts[v]):''); if(v)tap(td,'p'+v,'Points colonne '+v); r3.appendChild(td);}
+  for(let v=0;v<=D.max;v++){const td=mk('td',v?String(sh.pts[v]):''); if(v)tap(td,'p'+v,'Points, colonne '+v); r3.appendChild(td);}
   r3.appendChild(mk('td','','visa'));
   $('chapW').hidden=!D.hasChap;
   $('hon').textContent=sh.sums.hon; $('pts').textContent=sh.sums.pts;
@@ -1183,19 +1184,19 @@ function describe3(e){
   switch(e.k){
     case 'empty': return 'Ligne '+(e.i+1)+' : aucune valeur inscrite pour cette flèche.';
     case 'visa': return 'Ligne '+(e.i+1)+' : une rature n\'est pas contresignée (visa manquant).';
-    case 'colHon': return 'Colonne '+e.v+' : HON indique '+e.shown+', mais la colonne contient '+e.real+' marque(s).';
-    case 'colPts': return 'Colonne '+e.v+' : Pts indique '+e.shown+', or '+e.n+' × '+e.v+' = '+e.real+'.';
-    case 'totHon': return 'Honneurs : '+e.shown+' indiqué, la somme de HON (colonnes 1 à '+D3.max+') donne '+e.real+'.';
+    case 'colHon': return 'Colonne '+e.v+' : la case Honneurs indique '+e.shown+', mais la colonne contient '+e.real+' marque(s).';
+    case 'colPts': return 'Colonne '+e.v+' : la case Points indique '+e.shown+', or '+e.n+' × '+e.v+' = '+e.real+'.';
+    case 'totHon': return 'Honneurs : '+e.shown+' indiqué, la somme de la ligne Honneurs (colonnes 1 à '+D3.max+') donne '+e.real+'.';
     case 'totChap': return 'Chapelets : '+e.shown+' indiqué, les colonnes 2 et 3 donnent '+e.real+'.';
-    case 'totPts': return 'Points : '+e.shown+' indiqué, la somme de la ligne Pts donne '+e.real+'.';
+    case 'totPts': return 'Points : '+e.shown+' indiqué, la somme de la ligne Points donne '+e.real+'.';
     case 'sigA': return 'La signature de l\'archer manque.';
     case 'sigM': return 'La signature du marqueur manque.';
   }
 }
 function falseLabel3(k){
   if(k[0]==='r') return 'ligne '+(+k.slice(1)+1);
-  if(k[0]==='h') return 'HON, colonne '+k.slice(1);
-  if(k[0]==='p') return 'Pts, colonne '+k.slice(1);
+  if(k[0]==='h') return 'case Honneurs, colonne '+k.slice(1);
+  if(k[0]==='p') return 'case Points, colonne '+k.slice(1);
   if(k==='Thon') return 'total des honneurs';
   if(k==='Tchap') return 'total des chapelets';
   if(k==='Tpts') return 'total des points';
