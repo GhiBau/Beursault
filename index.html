@@ -1099,8 +1099,10 @@ function gen3(D){
   const kinds=shuffle(['empty','visa','colHon','colPts','totHon',D.hasChap?'totChap':'totPts','totPts','sigA','sigM']).filter((k,j,a)=>a.indexOf(k)===j);
   const chosen=kinds.slice(0,nErr);
   rows.forEach(r=>{r.mark=r.v;});
+  const allCols=['Thon','Tchap','Tpts'];
+  for(let v=0;v<=D.max;v++){allCols.push('h'+v,'p'+v);}
   chosen.forEach(k=>{
-    if(k==='empty'){const i=idx.shift();rows[i].mark=null;errs.push({k,t:'r'+i,i});}
+    if(k==='empty'){const i=idx.shift();rows[i].mark=null;errs.push({k,t:'r'+i,i,neutral:allCols});}
     else if(k==='visa'){
       let i=idx.shift();const r=rows[i];
       r.old=(r.v+1+((Math.random()*D.max)|0))%(D.max+1);r.visa=false;errs.push({k,t:'r'+i,i});
@@ -1220,7 +1222,7 @@ function paint3(){
 function describe3(e){
   const D3=D,sfx=e.derived?' (suite d\'une faute plus haut : cohérent avec les cases inscrites, mais faux)':'';
   switch(e.k){
-    case 'empty': return 'Ligne '+(e.i+1)+' : aucune valeur inscrite pour cette flèche.';
+    case 'empty': return 'Ligne '+(e.i+1)+' : aucune valeur inscrite pour cette flèche (les totaux sont forcément faux aussi, mais la faute est sur cette ligne).';
     case 'visa': return 'Ligne '+(e.i+1)+' : une rature n\'est pas contresignée (visa manquant).';
     case 'colHon': return 'Colonne '+e.v+' : la case Honneurs indique '+e.shown+', mais la colonne contient '+e.real+' marque(s).';
     case 'colPts': return 'Colonne '+e.v+' : la case Points indique '+e.shown+', or '+e.n+' × '+e.v+' = '+e.real+'.'+sfx;
